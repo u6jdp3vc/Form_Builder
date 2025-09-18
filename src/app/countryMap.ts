@@ -1,0 +1,15 @@
+export const countryMap: Record<string, string> = {
+  "AS-DTGBTN": "AS-DTGBTN",
+  "AS-DTGGER": "AS-DTGGER",
+  "AS-DTGJPN": "AS-DTGJPN",
+  "AS-DTGKHM": "AS-DTGKHM",
+  "AS-DTGKUL": "AS-DTGKUL",
+  "AS-DTGLAO": "AS-DTGLAO",
+  "AS-DTGMAL": "AS-DTGMAL",
+  "AS-DTGMMR": "AS-DTGMMR",
+  "AS-DTGPHL": "AS-DTGPHL",
+  "AS-DTGSIN": "AS-DTGSIN",
+  "AS-DTGSLK": "AS-DTGSLK",
+  "AS-DTGTHA": "AS-DTGTHA",
+  "AS-DTGVNM": "AS-DTGVNM",
+};
