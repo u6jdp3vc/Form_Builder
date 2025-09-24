@@ -16,7 +16,13 @@
             "checked": false,
             "type": "dropdown",
             "byFixedValue": true,
-            "country": "AS-DTGBTN,AS-DTGGER,AS-DTGJPN,AS-DTGKHM,AS-DTGKUL,AS-DTGLAO,AS-DTGMAL,AS-DTGMMR,AS-DTGPHL,AS-DTGSIN,AS-DTGSLK,AS-DTGTHA,AS-DTGVNM"
+            "country": "AS-DTGBTN,AS-DTGGER,AS-DTGJPN,AS-DTGKHM,AS-DTGKUL,AS-DTGLAO,AS-DTGMAL,AS-DTGMMR,AS-DTGPHL,AS-DTGSIN,AS-DTGSLK,AS-DTGTHA,AS-DTGVNM",
+            "optionsFromSQL": [
+              {
+                "name": "2025",
+                "code": "2025"
+              }
+            ]
           }
         ]
       }
@@ -39,7 +45,17 @@
             "checked": false,
             "type": "dropdown",
             "byFixedValue": true,
-            "country": "AS-DTGBTN,AS-DTGGER,AS-DTGJPN,AS-DTGKHM,AS-DTGKUL,AS-DTGLAO,AS-DTGMAL,AS-DTGMMR,AS-DTGPHL,AS-DTGSIN,AS-DTGSLK,AS-DTGVNM,AS-DTGTHA"
+            "country": "AS-DTGBTN,AS-DTGGER,AS-DTGJPN,AS-DTGKHM,AS-DTGKUL,AS-DTGLAO,AS-DTGMAL,AS-DTGMMR,AS-DTGPHL,AS-DTGSIN,AS-DTGSLK,AS-DTGVNM,AS-DTGTHA",
+            "optionsFromSQL": [
+              {
+                "name": "2025",
+                "code": "2025"
+              },
+              {
+                "name": "2024",
+                "code": "2024"
+              }
+            ]
           }
         ]
       }
@@ -60,7 +76,17 @@
             "checked": false,
             "type": "dropdown",
             "byFixedValue": true,
-            "country": "AS-DTGVNM,AS-DTGTHA,AS-DTGSLK,AS-DTGSIN,AS-DTGPHL,AS-DTGMMR,AS-DTGMAL,AS-DTGLAO,AS-DTGKHM,AS-DTGKUL,AS-DTGJPN,AS-DTGGER,AS-DTGBTN"
+            "country": "AS-DTGVNM,AS-DTGTHA,AS-DTGSLK,AS-DTGSIN,AS-DTGPHL,AS-DTGMMR,AS-DTGMAL,AS-DTGLAO,AS-DTGKHM,AS-DTGKUL,AS-DTGJPN,AS-DTGGER,AS-DTGBTN",
+            "optionsFromSQL": [
+              {
+                "name": "2025",
+                "code": "2025"
+              },
+              {
+                "name": "2024",
+                "code": "2024"
+              }
+            ]
           }
         ]
       }

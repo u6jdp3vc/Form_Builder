@@ -34,33 +34,42 @@ const ExportButton: React.FC<ExportButtonProps> = ({
     }
   };
 
-  const flattenObject = (obj: any, prefix = ""): Record<string, any> => {
+  const formatDate = (date: Date) => {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, "0");
+    const d = String(date.getDate()).padStart(2, "0");
+    return `${y}${m}${d}`;
+  };
+
+  // flatten แบบ index-based
+  const flattenWithIndex = (obj: any, prefix = ""): Record<string, any> => {
     const res: Record<string, any> = {};
     Object.keys(obj).forEach((key) => {
       const val = obj[key];
-      const newKey = prefix ? `${prefix}.${key}` : key;
-      if (val && typeof val === "object" && !Array.isArray(val)) {
-        Object.assign(res, flattenObject(val, newKey));
+      if (Array.isArray(val)) {
+        val.forEach((v, idx) => {
+          if (typeof v === "object") {
+            Object.assign(res, flattenWithIndex(v, `${prefix}${key}[${idx}].`));
+          } else {
+            res[`${prefix}${key}[${idx}]`] = v ?? "";
+          }
+        });
+      } else if (val && typeof val === "object") {
+        Object.assign(res, flattenWithIndex(val, `${prefix}${key}.`));
       } else {
-        res[newKey] = val ?? "";
+        res[`${prefix}${key}`] = val ?? "";
       }
     });
     return res;
   };
 
-  const formatDate = (date: Date) => {
-    const y = date.getFullYear();
-    const m = String(date.getMonth() + 1).padStart(2, "0");
-    const d = String(date.getDate()).padStart(2, "0");
-    return `${y}${m}${d}`; // YYYYMMDD
-  };
   const exportSelected = async (): Promise<any[]> => {
     if (!selectedFormId || !selectedCountry) {
       Swal.fire("Warning", "Please select form and country", "warning");
       return [];
     }
 
-    const countryCode = selectedCountry; // ใช้รหัสตรง ๆ
+    const countryCode = selectedCountry;
 
     const loaded = await loadCountryDB(countryCode);
     if (!loaded) return [];
@@ -70,10 +79,10 @@ const ExportButton: React.FC<ExportButtonProps> = ({
       Swal.fire("Error", "Form not found", "error");
       return [];
     }
+
     const safeTitle = selectedForm.title.replace(/[^\w\s-]/g, "_");
-    const today = new Date();
-    const dateStr = formatDate(today);
-    // เตรียม params
+    const dateStr = formatDate(new Date());
+
     const params: Record<string, any> = {};
     questions.forEach((q) =>
       q.options.forEach((o: any) => {
@@ -91,60 +100,45 @@ const ExportButton: React.FC<ExportButtonProps> = ({
 
     const queries = selectedForm.queryText
       ? selectedForm.queryText
-        .split(";")
-        .map((q: string) => q.trim())
-        .filter((q: string) => q.length > 0)
+          .split(";")
+          .map((q: string) => q.trim())
+          .filter((q: string) => q.length > 0)
       : [];
 
     const wb = XLSX.utils.book_new();
     const allRows: any[] = [];
 
-    if (queries.length === 0) {
-      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet([]), "Sheet1");
-    } else {
-      for (let i = 0; i < queries.length; i++) {
-        let sqlQuery = queries[i];
-        Object.keys(params).forEach((key) => {
-          const value = params[key];
-          const replacement = Array.isArray(value)
-            ? `(${value.map((v) => `'${v}'`).join(",")})`
-            : `'${value}'`;
-          const pattern = new RegExp(`\\{\\s*@?${key}\\s*\\}|@${key}`, "g");
-          sqlQuery = sqlQuery.replace(pattern, replacement);
+    for (let i = 0; i < queries.length; i++) {
+      let sqlQuery = queries[i];
+      Object.keys(params).forEach((key) => {
+        const value = params[key];
+        const replacement = Array.isArray(value)
+          ? `(${value.map((v) => `'${v}'`).join(",")})`
+          : `'${value}'`;
+        sqlQuery = sqlQuery.replace(new RegExp(`\\{\\s*@?${key}\\s*\\}|@${key}`, "g"), replacement);
+      });
+
+      try {
+        const res = await fetch("/api/runQuery", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ country: countryCode, queryTemplate: sqlQuery }),
         });
+        if (!res.ok) throw new Error(`Failed to run query ${i + 1}`);
+        const data = await res.json();
+        const rows = data.results?.[countryCode]?.rows || [];
 
-        try {
-          const res = await fetch("/api/runQuery", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ country: countryCode, queryTemplate: sqlQuery }),
-          });
-          if (!res.ok) throw new Error(`Failed to run query ${i + 1}`);
-          const data = await res.json();
-          console.log("🔹 runQuery response:", data);
-
-          const rows = data.results?.[countryCode]?.rows || [];
-          console.log("🔹 extracted rows:", rows);
-
-          if (rows.length > 0) {
-            const cleanedRows = rows.map((r: any) => {
-              const flat = flattenObject(r);
-              Object.keys(flat).forEach(key => {
-                if (flat[key] === null || flat[key] === undefined) flat[key] = "";
-                else if (typeof flat[key] === "object") flat[key] = JSON.stringify(flat[key]);
-              });
-              return flat;
-            });
-            allRows.push(...cleanedRows);
-            const ws = XLSX.utils.json_to_sheet(cleanedRows);
-            XLSX.utils.book_append_sheet(wb, ws, `Sheet${i + 1}`);
-          } else {
-            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet([]), `Sheet${i + 1}`);
-          }
-        } catch (err) {
-          console.error(`Error executing query ${i + 1}:`, err);
+        if (rows.length > 0) {
+          const cleanedRows = rows.map((r: any) => flattenWithIndex(r));
+          allRows.push(...cleanedRows);
+          const ws = XLSX.utils.json_to_sheet(cleanedRows);
+          XLSX.utils.book_append_sheet(wb, ws, `Sheet${i + 1}`);
+        } else {
           XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet([]), `Sheet${i + 1}`);
         }
+      } catch (err) {
+        console.error(`Error executing query ${i + 1}:`, err);
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet([]), `Sheet${i + 1}`);
       }
     }
 

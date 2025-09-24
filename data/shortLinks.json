@@ -384,7 +384,17 @@
               "checked": false,
               "type": "dropdown",
               "byFixedValue": true,
-              "country": "AS-DTGBTN,AS-DTGGER,AS-DTGJPN,AS-DTGKHM,AS-DTGKUL,AS-DTGLAO,AS-DTGMAL,AS-DTGMMR,AS-DTGPHL,AS-DTGSIN,AS-DTGSLK,AS-DTGVNM,AS-DTGTHA"
+              "country": "AS-DTGBTN,AS-DTGGER,AS-DTGJPN,AS-DTGKHM,AS-DTGKUL,AS-DTGLAO,AS-DTGMAL,AS-DTGMMR,AS-DTGPHL,AS-DTGSIN,AS-DTGSLK,AS-DTGVNM,AS-DTGTHA",
+              "optionsFromSQL": [
+                {
+                  "name": "2025",
+                  "code": "2025"
+                },
+                {
+                  "name": "2024",
+                  "code": "2024"
+                }
+              ]
             }
           ]
         }
@@ -408,7 +418,17 @@
               "checked": false,
               "type": "dropdown",
               "byFixedValue": true,
-              "country": "AS-DTGBTN,AS-DTGGER,AS-DTGJPN,AS-DTGKHM,AS-DTGKUL,AS-DTGLAO,AS-DTGMAL,AS-DTGMMR,AS-DTGPHL,AS-DTGSIN,AS-DTGSLK,AS-DTGVNM,AS-DTGTHA"
+              "country": "AS-DTGBTN,AS-DTGGER,AS-DTGJPN,AS-DTGKHM,AS-DTGKUL,AS-DTGLAO,AS-DTGMAL,AS-DTGMMR,AS-DTGPHL,AS-DTGSIN,AS-DTGSLK,AS-DTGVNM,AS-DTGTHA",
+              "optionsFromSQL": [
+                {
+                  "name": "2025",
+                  "code": "2025"
+                },
+                {
+                  "name": "2024",
+                  "code": "2024"
+                }
+              ]
             }
           ]
         }
@@ -432,7 +452,17 @@
               "checked": false,
               "type": "dropdown",
               "byFixedValue": true,
-              "country": "AS-DTGBTN,AS-DTGGER,AS-DTGJPN,AS-DTGKHM,AS-DTGKUL,AS-DTGLAO,AS-DTGMAL,AS-DTGMMR,AS-DTGPHL,AS-DTGSIN,AS-DTGSLK,AS-DTGVNM,AS-DTGTHA"
+              "country": "AS-DTGBTN,AS-DTGGER,AS-DTGJPN,AS-DTGKHM,AS-DTGKUL,AS-DTGLAO,AS-DTGMAL,AS-DTGMMR,AS-DTGPHL,AS-DTGSIN,AS-DTGSLK,AS-DTGVNM,AS-DTGTHA",
+              "optionsFromSQL": [
+                {
+                  "name": "2025",
+                  "code": "2025"
+                },
+                {
+                  "name": "2024",
+                  "code": "2024"
+                }
+              ]
             }
           ]
         }
@@ -456,7 +486,17 @@
               "checked": false,
               "type": "dropdown",
               "byFixedValue": true,
-              "country": "AS-DTGBTN,AS-DTGGER,AS-DTGJPN,AS-DTGKHM,AS-DTGKUL,AS-DTGLAO,AS-DTGMAL,AS-DTGMMR,AS-DTGPHL,AS-DTGSIN,AS-DTGSLK,AS-DTGVNM,AS-DTGTHA"
+              "country": "AS-DTGBTN,AS-DTGGER,AS-DTGJPN,AS-DTGKHM,AS-DTGKUL,AS-DTGLAO,AS-DTGMAL,AS-DTGMMR,AS-DTGPHL,AS-DTGSIN,AS-DTGSLK,AS-DTGVNM,AS-DTGTHA",
+              "optionsFromSQL": [
+                {
+                  "name": "2025",
+                  "code": "2025"
+                },
+                {
+                  "name": "2024",
+                  "code": "2024"
+                }
+              ]
             }
           ]
         }
@@ -480,7 +520,17 @@
               "checked": false,
               "type": "dropdown",
               "byFixedValue": true,
-              "country": "AS-DTGBTN,AS-DTGGER,AS-DTGJPN,AS-DTGKHM,AS-DTGKUL,AS-DTGLAO,AS-DTGMAL,AS-DTGMMR,AS-DTGPHL,AS-DTGSIN,AS-DTGSLK,AS-DTGVNM,AS-DTGTHA"
+              "country": "AS-DTGBTN,AS-DTGGER,AS-DTGJPN,AS-DTGKHM,AS-DTGKUL,AS-DTGLAO,AS-DTGMAL,AS-DTGMMR,AS-DTGPHL,AS-DTGSIN,AS-DTGSLK,AS-DTGVNM,AS-DTGTHA",
+              "optionsFromSQL": [
+                {
+                  "name": "2025",
+                  "code": "2025"
+                },
+                {
+                  "name": "2024",
+                  "code": "2024"
+                }
+              ]
             }
           ]
         }
@@ -504,7 +554,17 @@
               "checked": false,
               "type": "dropdown",
               "byFixedValue": true,
-              "country": "AS-DTGBTN,AS-DTGGER,AS-DTGJPN,AS-DTGKHM,AS-DTGKUL,AS-DTGLAO,AS-DTGMAL,AS-DTGMMR,AS-DTGPHL,AS-DTGSIN,AS-DTGSLK,AS-DTGVNM,AS-DTGTHA"
+              "country": "AS-DTGBTN,AS-DTGGER,AS-DTGJPN,AS-DTGKHM,AS-DTGKUL,AS-DTGLAO,AS-DTGMAL,AS-DTGMMR,AS-DTGPHL,AS-DTGSIN,AS-DTGSLK,AS-DTGVNM,AS-DTGTHA",
+              "optionsFromSQL": [
+                {
+                  "name": "2025",
+                  "code": "2025"
+                },
+                {
+                  "name": "2024",
+                  "code": "2024"
+                }
+              ]
             }
           ]
         }
@@ -528,7 +588,17 @@
               "checked": false,
               "type": "dropdown",
               "byFixedValue": true,
-              "country": "AS-DTGBTN,AS-DTGGER,AS-DTGJPN,AS-DTGKHM,AS-DTGKUL,AS-DTGLAO,AS-DTGMAL,AS-DTGMMR,AS-DTGPHL,AS-DTGSIN,AS-DTGSLK,AS-DTGVNM,AS-DTGTHA"
+              "country": "AS-DTGBTN,AS-DTGGER,AS-DTGJPN,AS-DTGKHM,AS-DTGKUL,AS-DTGLAO,AS-DTGMAL,AS-DTGMMR,AS-DTGPHL,AS-DTGSIN,AS-DTGSLK,AS-DTGVNM,AS-DTGTHA",
+              "optionsFromSQL": [
+                {
+                  "name": "2025",
+                  "code": "2025"
+                },
+                {
+                  "name": "2024",
+                  "code": "2024"
+                }
+              ]
             }
           ]
         }
@@ -552,7 +622,17 @@
               "checked": false,
               "type": "dropdown",
               "byFixedValue": true,
-              "country": "AS-DTGBTN,AS-DTGGER,AS-DTGJPN,AS-DTGKHM,AS-DTGKUL,AS-DTGLAO,AS-DTGMAL,AS-DTGMMR,AS-DTGPHL,AS-DTGSIN,AS-DTGSLK,AS-DTGVNM,AS-DTGTHA"
+              "country": "AS-DTGBTN,AS-DTGGER,AS-DTGJPN,AS-DTGKHM,AS-DTGKUL,AS-DTGLAO,AS-DTGMAL,AS-DTGMMR,AS-DTGPHL,AS-DTGSIN,AS-DTGSLK,AS-DTGVNM,AS-DTGTHA",
+              "optionsFromSQL": [
+                {
+                  "name": "2025",
+                  "code": "2025"
+                },
+                {
+                  "name": "2024",
+                  "code": "2024"
+                }
+              ]
             }
           ]
         }
@@ -576,7 +656,17 @@
               "checked": false,
               "type": "dropdown",
               "byFixedValue": true,
-              "country": "AS-DTGBTN,AS-DTGGER,AS-DTGJPN,AS-DTGKHM,AS-DTGKUL,AS-DTGLAO,AS-DTGMAL,AS-DTGMMR,AS-DTGPHL,AS-DTGSIN,AS-DTGSLK,AS-DTGVNM,AS-DTGTHA"
+              "country": "AS-DTGBTN,AS-DTGGER,AS-DTGJPN,AS-DTGKHM,AS-DTGKUL,AS-DTGLAO,AS-DTGMAL,AS-DTGMMR,AS-DTGPHL,AS-DTGSIN,AS-DTGSLK,AS-DTGVNM,AS-DTGTHA",
+              "optionsFromSQL": [
+                {
+                  "name": "2025",
+                  "code": "2025"
+                },
+                {
+                  "name": "2024",
+                  "code": "2024"
+                }
+              ]
             }
           ]
         }
@@ -600,7 +690,17 @@
               "checked": false,
               "type": "dropdown",
               "byFixedValue": true,
-              "country": "AS-DTGBTN,AS-DTGGER,AS-DTGJPN,AS-DTGKHM,AS-DTGKUL,AS-DTGLAO,AS-DTGMAL,AS-DTGMMR,AS-DTGPHL,AS-DTGSIN,AS-DTGSLK,AS-DTGVNM,AS-DTGTHA"
+              "country": "AS-DTGBTN,AS-DTGGER,AS-DTGJPN,AS-DTGKHM,AS-DTGKUL,AS-DTGLAO,AS-DTGMAL,AS-DTGMMR,AS-DTGPHL,AS-DTGSIN,AS-DTGSLK,AS-DTGVNM,AS-DTGTHA",
+              "optionsFromSQL": [
+                {
+                  "name": "2025",
+                  "code": "2025"
+                },
+                {
+                  "name": "2024",
+                  "code": "2024"
+                }
+              ]
             }
           ]
         }
@@ -624,7 +724,17 @@
               "checked": false,
               "type": "dropdown",
               "byFixedValue": true,
-              "country": "AS-DTGBTN,AS-DTGGER,AS-DTGJPN,AS-DTGKHM,AS-DTGKUL,AS-DTGLAO,AS-DTGMAL,AS-DTGMMR,AS-DTGPHL,AS-DTGSIN,AS-DTGSLK,AS-DTGVNM,AS-DTGTHA"
+              "country": "AS-DTGBTN,AS-DTGGER,AS-DTGJPN,AS-DTGKHM,AS-DTGKUL,AS-DTGLAO,AS-DTGMAL,AS-DTGMMR,AS-DTGPHL,AS-DTGSIN,AS-DTGSLK,AS-DTGVNM,AS-DTGTHA",
+              "optionsFromSQL": [
+                {
+                  "name": "2025",
+                  "code": "2025"
+                },
+                {
+                  "name": "2024",
+                  "code": "2024"
+                }
+              ]
             }
           ]
         }
@@ -648,7 +758,17 @@
               "checked": false,
               "type": "dropdown",
               "byFixedValue": true,
-              "country": "AS-DTGBTN,AS-DTGGER,AS-DTGJPN,AS-DTGKHM,AS-DTGKUL,AS-DTGLAO,AS-DTGMAL,AS-DTGMMR,AS-DTGPHL,AS-DTGSIN,AS-DTGSLK,AS-DTGVNM,AS-DTGTHA"
+              "country": "AS-DTGBTN,AS-DTGGER,AS-DTGJPN,AS-DTGKHM,AS-DTGKUL,AS-DTGLAO,AS-DTGMAL,AS-DTGMMR,AS-DTGPHL,AS-DTGSIN,AS-DTGSLK,AS-DTGVNM,AS-DTGTHA",
+              "optionsFromSQL": [
+                {
+                  "name": "2025",
+                  "code": "2025"
+                },
+                {
+                  "name": "2024",
+                  "code": "2024"
+                }
+              ]
             }
           ]
         }
@@ -672,7 +792,17 @@
               "checked": false,
               "type": "dropdown",
               "byFixedValue": true,
-              "country": "AS-DTGBTN,AS-DTGGER,AS-DTGJPN,AS-DTGKHM,AS-DTGKUL,AS-DTGLAO,AS-DTGMAL,AS-DTGMMR,AS-DTGPHL,AS-DTGSIN,AS-DTGSLK,AS-DTGVNM,AS-DTGTHA"
+              "country": "AS-DTGBTN,AS-DTGGER,AS-DTGJPN,AS-DTGKHM,AS-DTGKUL,AS-DTGLAO,AS-DTGMAL,AS-DTGMMR,AS-DTGPHL,AS-DTGSIN,AS-DTGSLK,AS-DTGVNM,AS-DTGTHA",
+              "optionsFromSQL": [
+                {
+                  "name": "2025",
+                  "code": "2025"
+                },
+                {
+                  "name": "2024",
+                  "code": "2024"
+                }
+              ]
             }
           ]
         }
