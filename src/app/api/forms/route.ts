@@ -14,7 +14,15 @@ const config = {
 
 // path ไปที่ไฟล์ questions.json
 const questionsFile = path.join(process.cwd(), "data", "questions.json");
-
+const shortLinksFile = path.join(process.cwd(), "data", "shortLinks.json");
+async function loadJson(filePath: string) {
+  try {
+    const data = await fs.readFile(filePath, "utf-8");
+    return JSON.parse(data);
+  } catch {
+    return {};
+  }
+}
 // helper โหลดไฟล์
 async function loadQuestions() {
   try {
@@ -28,6 +36,10 @@ async function loadQuestions() {
 // helper บันทึกไฟล์
 async function saveQuestions(data: any) {
   await fs.writeFile(questionsFile, JSON.stringify(data, null, 2), "utf-8");
+}
+
+async function saveJson(filePath: string, data: any) {
+  await fs.writeFile(filePath, JSON.stringify(data, null, 2), "utf-8");
 }
 
 // 📌 GET: ดึงฟอร์มพร้อม questions
@@ -174,9 +186,14 @@ export async function DELETE(req: NextRequest) {
       .query(`DELETE FROM SavedQueries WHERE Id = @Id`);
 
     // ลบ question ในไฟล์
-    const questionsData = await loadQuestions();
+    const questionsData = await loadJson(questionsFile);
     delete questionsData[id];
-    await saveQuestions(questionsData);
+    await saveJson(questionsFile, questionsData);
+
+    // ลบ shortLinks ใน shortLinks.json
+    const shortLinksData = await loadJson(shortLinksFile);
+    delete shortLinksData[id];
+    await saveJson(shortLinksFile, shortLinksData);
 
     return NextResponse.json({ success: true, id });
   } catch (err: any) {
