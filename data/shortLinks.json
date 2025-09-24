@@ -677,6 +677,30 @@
           ]
         }
       ]
+    },
+    "AS-DTGBTN,AS-DTGGER,AS-DTGJPN,AS-DTGKHM,AS-DTGKUL,AS-DTGLAO,AS-DTGMAL,AS-DTGMMR,AS-DTGPHL,AS-DTGSIN,AS-DTGSLK,AS-DTGVNM,AS-DTGTHA": {
+      "shortId": "9QYcVmFr",
+      "questions": [
+        {
+          "id": "54962332-e377-4649-9793-2002fe699f8a",
+          "title": "Default Question",
+          "description": "Auto generated question",
+          "type": "text",
+          "formId": "168",
+          "options": [
+            {
+              "id": "4f7aa9bb-0870-49f9-af37-f17ac2742981",
+              "label": "Year",
+              "paramName": "@year",
+              "value": "2025,2024",
+              "checked": false,
+              "type": "dropdown",
+              "byFixedValue": true,
+              "country": "AS-DTGBTN,AS-DTGGER,AS-DTGJPN,AS-DTGKHM,AS-DTGKUL,AS-DTGLAO,AS-DTGMAL,AS-DTGMMR,AS-DTGPHL,AS-DTGSIN,AS-DTGSLK,AS-DTGVNM,AS-DTGTHA"
+            }
+          ]
+        }
+      ]
     }
   }
 }

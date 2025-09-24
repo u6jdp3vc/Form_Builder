@@ -28,16 +28,17 @@ export default function MainQueryEditor({
   const [loadingLinks, setLoadingLinks] = React.useState(false);
 
   React.useEffect(() => {
-    if (countries) {
+    // ถ้า selectedFormId ยังว่าง → form ใหม่ → ไม่เซ็ต selectedCountries
+    if (!selectedFormId) return;
+
+    // ถ้า selectedCountries ว่าง และ countries prop มีค่า
+    if (countries && countries.length && selectedCountries.length === 0) {
       setSelectedCountries(
         typeof countries === "string" ? countries.split(",") : countries
       );
-    } else {
-      setSelectedCountries([]);
     }
-  }, [countries]);
+  }, [countries, selectedFormId]);
 
-  // เรียกเฉพาะตอนกดปุ่ม Generate Link
   const handleGenerateLinks = async () => {
     if (!selectedFormId || !selectedCountries.length) return [];
 
