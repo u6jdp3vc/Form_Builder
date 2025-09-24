@@ -1,0 +1,15 @@
+export const countryMaps: Record<string, string> = {
+  "AS-DTGBTN": "Bhutan",
+  "AS-DTGGER": "Germany",
+  "AS-DTGJPN": "Japan",
+  "AS-DTGKHM": "Cambodia",
+  "AS-DTGKUL": "Malaysia",
+  "AS-DTGLAO": "Laos",
+  "AS-DTGMAL": "Maldives",
+  "AS-DTGMMR": "Myanmar",
+  "AS-DTGPHL": "Philippines",
+  "AS-DTGSIN": "Singapore",
+  "AS-DTGSLK": "Sri Lanka",
+  "AS-DTGTHA": "Thailand",
+  "AS-DTGVNM": "Vietnam",
+};

@@ -1,0 +1,167 @@
+{
+  "1": {
+    "QueryName": "MainQuery_1756179624660",
+    "Country": "AS-DTGBTN",
+    "Service": "",
+    "AC": "",
+    "LockCountry": false,
+    "LockService": true,
+    "LockAC": true
+  },
+  "2": {
+    "QueryName": "MainQuery_1756179626116",
+    "Country": "AS-DTGBTN",
+    "Service": "",
+    "AC": "",
+    "LockCountry": false,
+    "LockService": true,
+    "LockAC": true
+  },
+  "3": {
+    "QueryName": "MainQuery_1756179644140",
+    "Country": "AS-DTGBTN",
+    "Service": "",
+    "AC": "",
+    "LockCountry": false,
+    "LockService": true,
+    "LockAC": true
+  },
+  "4": {
+    "QueryName": "crm",
+    "Description": "ยอดขาย",
+    "Country": "AS-DTGTHA",
+    "Service": "",
+    "AC": "",
+    "LockCountry": false,
+    "LockService": true,
+    "LockAC": true
+  },
+  "5": {
+    "QueryName": "MainQuery_1756180427341",
+    "Description": "",
+    "Country": "AS-DTGTHA",
+    "LockCountry": false,
+    "LockService": true,
+    "LockAC": true
+  },
+  "6": {
+    "QueryName": "MainQuery_1756180436480",
+    "Description": "",
+    "Country": "AS-DTGTHA",
+    "LockCountry": false,
+    "LockService": true,
+    "LockAC": true
+  },
+  "7": {
+    "QueryName": "MainQuery_1756180484375",
+    "Description": "",
+    "Country": "AS-DTGTHA",
+    "LockCountry": false,
+    "LockService": true,
+    "LockAC": true
+  },
+  "8": {
+    "QueryName": "MainQuery_1756180541055",
+    "Description": "",
+    "Country": "AS-DTGVNM",
+    "LockCountry": false,
+    "LockService": true,
+    "LockAC": true
+  },
+  "9": {
+    "QueryName": "MainQuery_1756181189543",
+    "Description": "",
+    "Country": "AS-DTGVNM",
+    "LockCountry": false,
+    "LockService": true,
+    "LockAC": true
+  },
+  "10": {
+    "QueryName": "MainQuery_1756181360574",
+    "Description": "",
+    "Country": "AS-DTGVNM",
+    "LockCountry": false,
+    "LockService": true,
+    "LockAC": true
+  },
+  "11": {
+    "QueryName": "MainQuery_1756181427872",
+    "Description": "",
+    "Country": "AS-DTGVNM",
+    "LockCountry": false,
+    "LockService": true,
+    "LockAC": true
+  },
+  "12": {
+    "QueryName": "MainQuery_1756181460214",
+    "Description": "",
+    "Country": "AS-DTGVNM",
+    "LockCountry": false,
+    "LockService": true,
+    "LockAC": true
+  },
+  "13": {
+    "QueryName": "MainQuery_1756181496200",
+    "Description": "",
+    "Country": "AS-DTGTHA",
+    "LockCountry": false,
+    "LockService": true,
+    "LockAC": true
+  },
+  "14": {
+    "QueryName": "MainQuery_1756181585703",
+    "Description": "",
+    "Country": "AS-DTGTHA",
+    "LockCountry": false,
+    "LockService": true,
+    "LockAC": true
+  },
+  "15": {
+    "QueryName": "MainQuery_1756181619141",
+    "Description": "",
+    "Country": "AS-DTGTHA",
+    "LockCountry": false,
+    "LockService": true,
+    "LockAC": true
+  },
+  "16": {
+    "QueryName": "Query_3b0340fa-d5a8-4801-b77b-4ac192f73ec8",
+    "Description": "",
+    "Country": "AS-DTGTHA",
+    "LockCountry": false,
+    "LockService": true,
+    "LockAC": true
+  },
+  "17": {
+    "QueryName": "Query_3b0340fa-d5a8-4801-b77b-4ac192f73ec8",
+    "Description": "",
+    "Country": "AS-DTGTHA",
+    "LockCountry": false,
+    "LockService": true,
+    "LockAC": true
+  },
+  "18": {
+    "QueryName": "Query_3b0340fa-d5a8-4801-b77b-4ac192f73ec8",
+    "Description": "",
+    "Country": "AS-DTGTHA",
+    "LockCountry": false,
+    "LockService": true,
+    "LockAC": true
+  },
+  "19": {
+    "QueryName": "hello",
+    "Description": "hi",
+    "Country": "AS-DTGTHA",
+    "LockCountry": false,
+    "LockService": true,
+    "LockAC": true
+  },
+  "20": {
+    "QueryName": "hi",
+    "Description": "test",
+    "Country": "AS-DTGTHA",
+    "LockCountry": false,
+    "LockService": true,
+    "LockAC": true
+  }
+}
