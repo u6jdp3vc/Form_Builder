@@ -28,16 +28,36 @@ export default function MainQueryEditor({
   const [loadingLinks, setLoadingLinks] = React.useState(false);
 
   React.useEffect(() => {
-    // ถ้า selectedFormId ยังว่าง → form ใหม่ → ไม่เซ็ต selectedCountries
     if (!selectedFormId) return;
 
-    // ถ้า selectedCountries ว่าง และ countries prop มีค่า
-    if (countries && countries.length && selectedCountries.length === 0) {
-      setSelectedCountries(
-        typeof countries === "string" ? countries.split(",") : countries
-      );
-    }
-  }, [countries, selectedFormId]);
+    const loadCountriesFromQuestions = async () => {
+      try {
+        const res = await fetch(`/api/saveQuestions?formId=${selectedFormId}`);
+        const data = await res.json();
+
+        if (data.success) {
+          const availableCountries = Object.keys(data.questionsByCountry || {});
+          console.log("Available countries from API:", availableCountries);
+          setSelectedCountries(availableCountries);
+        }
+      } catch (err) {
+        console.error("Error loading countries from questions.json:", err);
+      }
+    };
+
+    loadCountriesFromQuestions();
+  }, [selectedFormId]);
+
+  const handleSyncCountries = async (selected: string[]) => {
+    if (!selectedFormId) return;
+
+    // 1️⃣ อัปเดต DB
+    await fetch(`/api/forms/${selectedFormId}/updateCountries`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ countries: selected }),
+    });
+  };
 
   const handleGenerateLinks = async () => {
     if (!selectedFormId || !selectedCountries.length) return [];
@@ -118,7 +138,7 @@ export default function MainQueryEditor({
           className="w-full text-black"
         >
           {Object.keys(countryMaps).map(c => (
-            <Option key={c} value={c}>
+            <Option key={c} value={c} >
               {countryMaps[c]}
             </Option>
           ))}
@@ -143,6 +163,7 @@ export default function MainQueryEditor({
           type="button"
           onClick={async () => {
             const links = await handleGenerateLinks();
+            await handleSyncCountries(selectedCountries);
             if (!links.length) return Swal.fire("Error", "Please generate links first", "error");
 
             Swal.fire({

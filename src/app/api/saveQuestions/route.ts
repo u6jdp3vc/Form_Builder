@@ -6,33 +6,30 @@ const filePath = path.join(process.cwd(), 'data', 'questions.json');
 
 export async function POST(req: NextRequest) {
   try {
-    const { formId, country, questions } = await req.json();
+    const { formId, countries, questions } = await req.json();
 
-    if (!formId || !country || !Array.isArray(questions) || questions.length === 0) {
-      return NextResponse.json({ success: false, error: 'Missing formId, country, or questions' }, { status: 400 });
+    if (!formId || !Array.isArray(countries) || countries.length === 0 || !Array.isArray(questions)) {
+      return NextResponse.json({ success: false, error: 'Missing formId, countries, or questions' }, { status: 400 });
     }
 
-    // ตรวจสอบว่ามีโฟลเดอร์ data ถ้าไม่มี ให้สร้าง
     const dirPath = path.dirname(filePath);
-    if (!fs.existsSync(dirPath)) {
-      fs.mkdirSync(dirPath, { recursive: true });
-    }
+    if (!fs.existsSync(dirPath)) fs.mkdirSync(dirPath, { recursive: true });
 
-    // อ่านไฟล์เดิม (ถ้าไม่มีจะสร้าง object ใหม่)
+    // โหลดไฟล์เดิม
     let data: Record<string, any> = {};
     if (fs.existsSync(filePath)) {
       const raw = fs.readFileSync(filePath, 'utf-8');
       data = raw ? JSON.parse(raw) : {};
     }
 
-    // สร้าง object ถ้ายังไม่มี
     if (!data[formId]) data[formId] = {};
-    data[formId][country] = questions;
 
-    // เขียนไฟล์ใหม่
+    // อัปเดต questions สำหรับแต่ละ country
+    countries.forEach(c => {
+      data[formId][c] = questions;
+    });
+
     fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf-8');
-
-    console.log('Questions saved to:', filePath);
 
     return NextResponse.json({ success: true });
   } catch (err) {
@@ -53,7 +50,6 @@ export async function GET(req: NextRequest) {
     let data: Record<string, any> = {};
     if (fs.existsSync(filePath)) {
       const raw = fs.readFileSync(filePath, 'utf-8');
-      console.log("Raw questions.json content:", raw);
       data = raw ? JSON.parse(raw) : {};
     }
 
@@ -61,14 +57,18 @@ export async function GET(req: NextRequest) {
     if (country) {
       questions = data[formId]?.[country] || [];
     } else {
-      // ถ้าไม่มี country ให้รวม questions ของทุกประเทศเป็น array เดียว
       const allCountries = data[formId] || {};
-      questions = Object.values(allCountries).flat(); // flatten array ของแต่ละประเทศ
+      questions = Object.values(allCountries).flat();
     }
 
-    return NextResponse.json({ success: true, questions });
+    return NextResponse.json({
+      success: true,
+      questions,
+      questionsByCountry: data[formId] || {}   // 👈 เพิ่มตรงนี้
+    });
   } catch (err) {
     console.error('Error reading questions:', err);
     return NextResponse.json({ success: false, error: 'Failed to read questions' }, { status: 500 });
   }
 }
+

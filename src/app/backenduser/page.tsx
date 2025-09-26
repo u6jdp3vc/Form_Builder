@@ -381,7 +381,9 @@ export default function DynamicGoogleForm() {
 
   // Save Main + Questions พร้อมกัน
   const handleSaveAll = async () => {
-    if (!formTitle || !selectedCountry) return Swal.fire("Error", "Please enter title and country", "error");
+    if (!formTitle || !selectedCountry.length) {
+      return Swal.fire("Error", "Please enter title and select countries", "error");
+    }
 
     const isUpdate = Boolean(selectedFormId);
     const method = isUpdate ? "PUT" : "POST";
@@ -389,7 +391,7 @@ export default function DynamicGoogleForm() {
     try {
       setDbLoading(true);
 
-      // Save main form
+      // Save main form (DB)
       const res = await fetch("/api/forms", {
         method,
         headers: { "Content-Type": "application/json" },
@@ -402,25 +404,40 @@ export default function DynamicGoogleForm() {
         }),
         credentials: "include",
       });
+
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to save form");
 
       const savedId = String(data.id);
       setSelectedFormId(savedId);
 
-      // Prepare questions with same formId
+      // Prepare questions
       const updatedQuestions = questions.map(q => ({
         ...q,
         formId: savedId,
-        options: q.options.map(o => ({ ...o, country: selectedCountry, byFixedValue: o.byFixedValue ?? false }))
+        options: q.options.map(o => ({
+          ...o,
+          byFixedValue: o.byFixedValue ?? false
+        }))
       }));
 
-      // Save questions
+      // Save questions for each selected country
       const qRes = await fetch("/api/saveQuestions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ formId: savedId, country: selectedCountry, questions: updatedQuestions }),
+        body: JSON.stringify({
+          formId: savedId,
+          countries: Array.isArray(selectedCountry)
+            ? selectedCountry
+            : selectedCountry.split(","), // ถ้าเป็น string → แปลงเป็น array
+          questions: updatedQuestions
+        }),
         credentials: "include",
+      });
+      console.log({
+        formId: savedId,
+        countries: selectedCountry,
+        questions: updatedQuestions
       });
       const qData = await qRes.json();
       if (!qRes.ok || !qData.success) throw new Error(qData.error || "Failed to save questions");
@@ -434,7 +451,10 @@ export default function DynamicGoogleForm() {
         queryText: sqlQuery,
         questions: updatedQuestions,
       };
-      setSavedForms(prev => isUpdate ? prev.map(f => f.id === savedId ? newForm : f) : [newForm, ...prev]);
+
+      setSavedForms(prev =>
+        isUpdate ? prev.map(f => f.id === savedId ? newForm : f) : [newForm, ...prev]
+      );
       setQuestions(updatedQuestions);
       setQuestionsMap(prev => ({ ...prev, [savedId]: updatedQuestions }));
 
