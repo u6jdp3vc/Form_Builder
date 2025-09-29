@@ -98,10 +98,17 @@ export default function MainQueryEditor({
             setSelectedCountries(vals);
             onCountryChange(vals);
           }}
+          showSearch // ต้องเปิดเพื่อค้นหา
+          optionFilterProp="children" // search ตามข้อความแสดง
+          filterOption={(input, option) =>
+            (option?.children as unknown as string).toLowerCase().includes(input.toLowerCase())
+          }
           className="w-full text-black"
         >
           {Object.keys(countryMaps).map(c => (
-            <Option key={c} value={c}>{countryMaps[c]}</Option>
+            <Option key={c} value={c}>
+              {countryMaps[c]}
+            </Option>
           ))}
         </Select>
       </div>

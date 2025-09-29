@@ -1,12 +1,1 @@
-{
-  "201": [
-    {
-      "id": "126b6def-bbf3-49d9-bc39-0dca95fa3a56",
-      "title": "Default Question",
-      "description": "Auto generated question",
-      "type": "text",
-      "formId": "201",
-      "options": []
-    }
-  ]
-}
+{}
