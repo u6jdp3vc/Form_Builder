@@ -22,12 +22,20 @@ export async function POST(req: NextRequest) {
       data = raw ? JSON.parse(raw) : {};
     }
 
-    if (!data[formId]) data[formId] = {};
+    // ถ้า formId ยังไม่มี ให้สร้าง array ว่าง
+    if (!data[formId]) data[formId] = [];
 
-    // อัปเดต questions สำหรับแต่ละ country
-    countries.forEach(c => {
-      data[formId][c] = questions;
-    });
+    // Merge countries เข้าไปใน options ของ questions
+    const updatedQuestions = questions.map(q => ({
+      ...q,
+      options: q.options.map((o: { countries: any; }) => ({
+        ...o,
+        countries: Array.from(new Set([...(o.countries || []), ...countries])),
+      })),
+    }));
+
+    // บันทึก updatedQuestions เป็น array เดียว
+    data[formId] = updatedQuestions;
 
     fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf-8');
 

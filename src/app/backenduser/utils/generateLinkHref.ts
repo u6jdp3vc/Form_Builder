@@ -7,7 +7,7 @@ export const generateLinksForCountries = async (
   runQueryForCountry: (country: string) => Promise<any[]> = async () => []
 ): Promise<{ link: string, queryData: any[] }[]> => {
   if (!selectedFormId || !selectedCountries?.length || !questions?.length) return [];
-  
+
   const results: { link: string, queryData: any[] }[] = [];
 
   for (const country of selectedCountries) {
@@ -33,7 +33,11 @@ export const generateLinksForCountries = async (
       await fetch("/api/saveState", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ selectedFormId, country, questions }),
+        body: JSON.stringify({
+          selectedFormId,
+          country,
+          questions,   // questions ล่าสุดจาก form
+        }),
       });
     }
 

@@ -14,18 +14,19 @@ export default function DynamicGoogleForm() {
   const [selectedFormId, setSelectedFormId] = useState<string>("");
   const [formTitle, setFormTitle] = useState("");
   const [formDescription, setFormDescription] = useState("");
-  const [selectedCountry, setSelectedCountry] = useState("");
+  const [selectedCountry, setSelectedCountry] = useState<string[]>([]);
   const [sqlQuery, setSqlQuery] = useState("");
   const [questions, setQuestions] = useState<Question[]>([]);
   const [countries, setCountries] = useState<string[]>([]);
   const [originalSqlQuery, setOriginalSqlQuery] = useState("");
-  const [originalCountry, setOriginalCountry] = useState("");
+  const [originalCountry, setOriginalCountry] = useState<string | string[]>("");
   const [ready, setReady] = useState(false);
   const [questionsMap, setQuestionsMap] = useState<Record<string, Question[]>>({});
   const [dbLoading, setDbLoading] = useState(false);
   const [bulkMode, setBulkMode] = useState(false);
   const [selectedFormsForDelete, setSelectedFormsForDelete] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const selectedCountriesArr = Array.isArray(selectedCountry) ? selectedCountry : [selectedCountry];
 
   // Initialize saved forms and payload
   useEffect(() => {
@@ -67,12 +68,17 @@ export default function DynamicGoogleForm() {
     init();
   }, []);
 
+  function normalizeCountries(c: string | string[] | undefined): string[] {
+    if (!c) return [];
+    return Array.isArray(c) ? c : [c];
+  }
+
   // Select form
   const selectForm = async (id: string) => {
     if (!id) {
       setFormTitle("");
       setFormDescription("");
-      setSelectedCountry("");
+      setSelectedCountry([]);
       setSqlQuery("");
       setOriginalSqlQuery("");
       setSelectedFormId("");
@@ -89,17 +95,17 @@ export default function DynamicGoogleForm() {
 
     setFormTitle(f.title);
     setFormDescription(f.description);
-    setSelectedCountry(f.country); // อัปเดต state
+    setSelectedCountry(normalizeCountries(f.country));
     setSqlQuery(f.queryText || "");
     setOriginalSqlQuery(f.queryText || "");
-    setOriginalCountry(f.country);
+    setOriginalCountry(normalizeCountries(f.country));
     setSelectedFormId(id);
 
     if (questionsMap[id]) {
       setQuestions(questionsMap[id]);
     } else {
       // ใช้ f.country แทน selectedCountry
-      let qs = await loadQuestions(id, f.country);
+      let qs = await loadQuestions(id, normalizeCountries(f.country));
       if (!qs || qs.length === 0) qs = generateDefaultQuestions(id);
 
       // เพิ่ม byFixedValue default
@@ -228,17 +234,29 @@ export default function DynamicGoogleForm() {
         description: "Auto generated question",
         type: "text",
         formId,
-        options: [], // 👈 เริ่มต้นว่าง ไม่มี default option
+        options: [], // เริ่มต้นว่าง
       },
     ];
   };
 
-  const loadQuestions = async (formId: string, country: string) => {
+  const loadQuestions = async (formId: string, countries?: string[]) => {
     try {
-      const res = await fetch(`/api/saveQuestions?formId=${formId}&country=${country}`, { credentials: "include" });
+      const res = await fetch(`/api/saveQuestions?formId=${formId}`, {
+        credentials: "include"
+      });
       const data = await res.json();
       if (!res.ok || !data.success) return [];
-      return Array.isArray(data.questions) ? data.questions : [];
+
+      return Array.isArray(data.questions)
+        ? data.questions.map((q: { options: any[]; }) => ({
+          ...q,
+          options: q.options.map(o => ({
+            ...o,
+            byFixedValue: o.byFixedValue ?? false,
+            country: ""  // หรือ logic ตาม countries
+          }))
+        }))
+        : [];
     } catch (err) {
       console.error(err);
       return [];
@@ -247,29 +265,30 @@ export default function DynamicGoogleForm() {
 
   // Update country in all options when country changes
   useEffect(() => {
-    if (!selectedFormId || !selectedCountry) return;
+    if (!selectedFormId || !selectedCountry.length) return;
 
-    setQuestions(prev => {
-      let changed = false;
-
-      const updated = prev.map(q => ({
+    setQuestions(prev =>
+      prev.map(q => ({
         ...q,
-        options: q.options.map(o => {
-          if (o.country !== selectedCountry) {
-            changed = true;
-            return { ...o, country: selectedCountry };
-          }
-          return o;
-        }),
-      }));
-
-      return changed ? updated : prev; // ถ้าไม่มีอะไรเปลี่ยน, return prev
-    });
+        options: q.options.map(o => ({
+          ...o,
+          countries: (o.countries || []).filter((c: string) => selectedCountriesArr.includes(c))
+        }))
+      }))
+    );
   }, [selectedCountry, selectedFormId]);
 
   // Add new option
   const addOption = (qid: string) => {
-    const newOption: Option = { id: generateUUID(), label: "", paramName: "", value: "", checked: false };
+    const newOption: Option = {
+      id: generateUUID(),
+      label: "",
+      paramName: "",
+      value: "",
+      checked: false,
+      countries: [...selectedCountriesArr] // เพิ่ม default เป็น selected countries ปัจจุบัน
+    };
+
     setQuestions(prev =>
       prev.map(q => q.id === qid ? { ...q, options: [...q.options, newOption] } : q)
     );
@@ -278,8 +297,8 @@ export default function DynamicGoogleForm() {
   const updateOptionLabel = (
     qid: string,
     oid: string,
-    key: "label" | "paramName" | "value" | "type" | "country" | "byFixedValue",
-    val: string
+    key: "label" | "paramName" | "value" | "type" | "countries" | "byFixedValue",
+    val: string | string[]
   ) => {
     setQuestions(prev =>
       prev.map(q =>
@@ -289,15 +308,13 @@ export default function DynamicGoogleForm() {
             options: q.options.map(o => {
               if (o.id !== oid) return o;
 
-              if (key === "value") {
-                return { ...o, value: val }; // เก็บตรง ๆ ไม่ต้องแปลง
-              }
-              if (key === "byFixedValue") {
-                return { ...o, byFixedValue: val === "true", value: o.value || "" };
-              }
+              if (key === "value") return { ...o, value: val as string };
+              if (key === "byFixedValue") return { ...o, byFixedValue: val === "true" };
+
+              if (key === "countries") return { ...o, countries: Array.isArray(val) ? val : [val] };
 
               return { ...o, [key]: val };
-            })
+            }),
           }
           : q
       )
@@ -346,7 +363,7 @@ export default function DynamicGoogleForm() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             formId: savedId,
-            country: selectedCountry,
+            countries: Array.isArray(selectedCountry) ? selectedCountry : [selectedCountry],
             questions: finalQuestions,
           }),
           credentials: "include",
@@ -391,7 +408,7 @@ export default function DynamicGoogleForm() {
     try {
       setDbLoading(true);
 
-      // Save main form (DB)
+      // Save main form
       const res = await fetch("/api/forms", {
         method,
         headers: { "Content-Type": "application/json" },
@@ -411,50 +428,61 @@ export default function DynamicGoogleForm() {
       const savedId = String(data.id);
       setSelectedFormId(savedId);
 
-      // Prepare questions
+      // Prepare updated questions
       const updatedQuestions = questions.map(q => ({
         ...q,
         formId: savedId,
         options: q.options.map(o => ({
           ...o,
-          byFixedValue: o.byFixedValue ?? false
+          byFixedValue: o.byFixedValue ?? false,
+          countries: (o.countries || []).filter((c: string) => selectedCountriesArr.includes(c))
         }))
       }));
 
-      // Save questions for each selected country
+      // Save questions to backend
       const qRes = await fetch("/api/saveQuestions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           formId: savedId,
-          countries: Array.isArray(selectedCountry)
-            ? selectedCountry
-            : selectedCountry.split(","), // ถ้าเป็น string → แปลงเป็น array
+          countries: selectedCountriesArr,
           questions: updatedQuestions
         }),
         credentials: "include",
       });
-      console.log({
-        formId: savedId,
-        countries: selectedCountry,
-        questions: updatedQuestions
-      });
+
       const qData = await qRes.json();
       if (!qRes.ok || !qData.success) throw new Error(qData.error || "Failed to save questions");
 
-      // Update state
+      // ✅ Update short links for each country (PUT /api/saveState)
+      for (const country of selectedCountriesArr) {
+        try {
+          await fetch("/api/saveState", {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              selectedFormId: savedId,
+              country,
+              questions: updatedQuestions
+            }),
+            credentials: "include",
+          });
+        } catch (err) {
+          console.error(`Failed to update shortState for ${country}:`, err);
+        }
+      }
+
+      // Update state in client
       const newForm: SavedForm = {
         id: savedId,
         title: formTitle,
         description: formDescription,
         country: selectedCountry,
         queryText: sqlQuery,
-        questions: updatedQuestions,
+        questions: updatedQuestions
       };
 
-      setSavedForms(prev =>
-        isUpdate ? prev.map(f => f.id === savedId ? newForm : f) : [newForm, ...prev]
-      );
+      setSavedForms(prev => isUpdate ? prev.map(f => f.id === savedId ? newForm : f) : [newForm, ...prev]);
       setQuestions(updatedQuestions);
       setQuestionsMap(prev => ({ ...prev, [savedId]: updatedQuestions }));
 
@@ -467,6 +495,10 @@ export default function DynamicGoogleForm() {
       setDbLoading(false);
     }
   };
+
+  function handleCountryChange(val: string | string[]) {
+    setSelectedCountry(Array.isArray(val) ? val : val.split(","));
+  }
 
   if (!ready) return <p>Loading...</p>;
 
@@ -508,7 +540,7 @@ export default function DynamicGoogleForm() {
           optionsFromDatabase={{}}
           onTitleChange={setFormTitle}
           onDescriptionChange={setFormDescription}
-          onCountryChange={setSelectedCountry}
+          onCountryChange={handleCountryChange}
           onQueryChange={setSqlQuery}
           onRunQuery={() => { }}
           onSaveQuery={handleSaveMainQuery}

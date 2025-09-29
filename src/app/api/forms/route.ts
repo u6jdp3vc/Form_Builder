@@ -81,7 +81,7 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const { title, description, country, queryText, questions } = body;
-
+    const countryStr = Array.isArray(country) ? country.join(",") : (country || "");
     if (!title || !queryText) {
       return NextResponse.json(
         { error: "Title and QueryText are required" },
@@ -91,18 +91,18 @@ export async function POST(req: NextRequest) {
 
     const pool = await sql.connect(config);
     console.log({
-  title, titleLength: title.length,
-  queryText, queryTextLength: queryText.length,
-  description, descriptionLength: description.length,
-  country, countryLength: country.length
-});
+      title, titleLength: title.length,
+      queryText, queryTextLength: queryText.length,
+      description, descriptionLength: description.length,
+      country, countryLength: country.length
+    });
     // insert ฟอร์ม
     const result = await pool
       .request()
       .input("QueryName", sql.NVarChar, title.trim())
       .input("QueryText", sql.NVarChar, queryText)
       .input("Description", sql.NVarChar, description || "")
-      .input("Country", sql.NVarChar, country?.trim() || "")
+      .input("Country", sql.NVarChar, countryStr)
       .query(`
         INSERT INTO SavedQueries (QueryName, QueryText, Description, Country)
         OUTPUT INSERTED.Id
@@ -133,7 +133,7 @@ export async function PUT(req: NextRequest) {
   try {
     const body = await req.json();
     const { id, title, description, country, queryText, questions } = body;
-
+    const countryStr = Array.isArray(country) ? country.join(",") : (country || "");
     if (!id) return NextResponse.json({ error: "Form Id required" }, { status: 400 });
 
     const pool = await sql.connect(config);
@@ -143,7 +143,7 @@ export async function PUT(req: NextRequest) {
       .request()
       .input("QueryText", sql.NVarChar, queryText || "")
       .input("Description", sql.NVarChar, description || "")
-      .input("Country", sql.NVarChar, country?.trim() || "")
+      .input("Country", sql.NVarChar, countryStr)
       .input("Id", sql.Int, id)
       .query(`
         UPDATE SavedQueries

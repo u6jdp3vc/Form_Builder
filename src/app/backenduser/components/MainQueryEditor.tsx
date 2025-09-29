@@ -28,25 +28,16 @@ export default function MainQueryEditor({
   const [loadingLinks, setLoadingLinks] = React.useState(false);
 
   React.useEffect(() => {
-    if (!selectedFormId) return;
+  if (!selectedFormId || !questions) return;
 
-    const loadCountriesFromQuestions = async () => {
-      try {
-        const res = await fetch(`/api/saveQuestions?formId=${selectedFormId}`);
-        const data = await res.json();
+  // ดึง countries จาก questions[].options[].countries
+  const allCountries = questions
+    .flatMap(q => q.options.flatMap(o => o.countries || []));
+  const uniqueCountries = Array.from(new Set(allCountries));
 
-        if (data.success) {
-          const availableCountries = Object.keys(data.questionsByCountry || {});
-          console.log("Available countries from API:", availableCountries);
-          setSelectedCountries(availableCountries);
-        }
-      } catch (err) {
-        console.error("Error loading countries from questions.json:", err);
-      }
-    };
-
-    loadCountriesFromQuestions();
-  }, [selectedFormId]);
+  setSelectedCountries(uniqueCountries);
+  onCountryChange(uniqueCountries);
+}, [selectedFormId, questions]);
 
   const handleSyncCountries = async (selected: string[]) => {
     if (!selectedFormId) return;
@@ -62,11 +53,11 @@ export default function MainQueryEditor({
   const handleGenerateLinks = async () => {
     if (!selectedFormId || !selectedCountries.length) return [];
 
-    setLoadingLinks(true); // เริ่ม loading
+    setLoadingLinks(true);
     try {
       const linksWithData = await generateLinksForCountries(
         selectedFormId,
-        selectedCountries,
+        selectedCountries,   // ใช้ selectedCountries ที่มาจาก prop
         questions,
         async (country) => {
           return []; // แทน query ด้วย array ว่าง
@@ -75,7 +66,6 @@ export default function MainQueryEditor({
 
       setFrontendLinks(linksWithData.map(r => r.link));
 
-      // update questions optionsByCountry
       linksWithData.forEach((r, i) => {
         const country = selectedCountries[i];
         const optionsFromSQL = r.queryData.map((row: any) => ({ name: row.name, code: row.code }));
@@ -94,7 +84,7 @@ export default function MainQueryEditor({
 
       return linksWithData.map(r => r.link);
     } finally {
-      setLoadingLinks(false); // จบ loading
+      setLoadingLinks(false);
     }
   };
 
@@ -133,7 +123,7 @@ export default function MainQueryEditor({
           value={selectedCountries}      // จะโชว์ตาม state ที่ sync กับ props
           onChange={(vals: string[]) => {
             setSelectedCountries(vals);
-            onCountryChange(vals.join(",")); // ส่งกลับ parent
+            onCountryChange(vals);
           }}
           className="w-full text-black"
         >
