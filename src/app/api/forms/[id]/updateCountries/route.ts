@@ -4,12 +4,6 @@ import sql from "mssql";
 import fs from "fs/promises";
 import path from "path";
 
-interface Params {
-  params: {
-    id: string;
-  };
-}
-
 const config = {
   user: process.env.DB_USER!,
   password: process.env.DB_PASS!,
