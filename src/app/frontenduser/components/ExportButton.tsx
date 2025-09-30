@@ -3,7 +3,7 @@
 
 import React, { useState } from "react";
 import Swal from "sweetalert2";
-import * as XLSX from "xlsx";
+import ExcelJS from "exceljs"; // ✅ ใช้ ExcelJS แทน xlsx
 import { ExportButtonProps } from "../types";
 
 const ExportButton: React.FC<ExportButtonProps> = ({
@@ -41,7 +41,6 @@ const ExportButton: React.FC<ExportButtonProps> = ({
     return `${y}${m}${d}`;
   };
 
-  // flatten แบบ index-based
   const flattenWithIndex = (obj: any, prefix = ""): Record<string, any> => {
     const res: Record<string, any> = {};
     Object.keys(obj).forEach((key) => {
@@ -70,7 +69,6 @@ const ExportButton: React.FC<ExportButtonProps> = ({
     }
 
     const countryCode = selectedCountry;
-
     const loaded = await loadCountryDB(countryCode);
     if (!loaded) return [];
 
@@ -105,7 +103,7 @@ const ExportButton: React.FC<ExportButtonProps> = ({
           .filter((q: string) => q.length > 0)
       : [];
 
-    const wb = XLSX.utils.book_new();
+    const workbook = new ExcelJS.Workbook();
     const allRows: any[] = [];
 
     for (let i = 0; i < queries.length; i++) {
@@ -131,18 +129,46 @@ const ExportButton: React.FC<ExportButtonProps> = ({
         if (rows.length > 0) {
           const cleanedRows = rows.map((r: any) => flattenWithIndex(r));
           allRows.push(...cleanedRows);
-          const ws = XLSX.utils.json_to_sheet(cleanedRows);
-          XLSX.utils.book_append_sheet(wb, ws, `Sheet${i + 1}`);
+
+          const sheet = workbook.addWorksheet(`Sheet${i + 1}`);
+          const headers = Object.keys(cleanedRows[0]);
+          sheet.addRow(headers);
+
+          cleanedRows.forEach((row: { [x: string]: string; }) => {
+            const excelRow = sheet.addRow(headers.map((h) => row[h]));
+
+            if (row["MATCHTEXT"] === "N") {
+              excelRow.eachCell((cell) => {
+                cell.fill = {
+                  type: "pattern",
+                  pattern: "solid",
+                  fgColor: { argb: "FFFF0000" }, // แดง
+                };
+                cell.font = { color: { argb: "FFFFFFFF" } }; // ขาว
+              });
+            }
+          });
         } else {
-          XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet([]), `Sheet${i + 1}`);
+          workbook.addWorksheet(`Sheet${i + 1}`);
         }
       } catch (err) {
         console.error(`Error executing query ${i + 1}:`, err);
-        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet([]), `Sheet${i + 1}`);
+        workbook.addWorksheet(`Sheet${i + 1}`);
       }
     }
 
-    XLSX.writeFile(wb, `${safeTitle}_${countryCode}_${dateStr}.xlsx`);
+    // ดาวน์โหลดไฟล์ใน browser
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${safeTitle}_${countryCode}_${dateStr}.xlsx`;
+    a.click();
+    URL.revokeObjectURL(url);
+
     return allRows;
   };
 
