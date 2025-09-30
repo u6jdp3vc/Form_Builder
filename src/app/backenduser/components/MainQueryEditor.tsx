@@ -27,7 +27,6 @@ export default function MainQueryEditor({
 
   React.useEffect(() => {
     if (!selectedFormId) return;
-
     if (!firstLoadRef.current) return; // โหลดครั้งแรกแล้วไม่ต้อง fetch ใหม่
 
     const fetchCountries = async () => {
@@ -57,7 +56,12 @@ export default function MainQueryEditor({
         questions,
         async () => []
       );
-      return linksWithData.map(r => r.link);
+
+      // ดึง base URL จาก document.location
+      const baseUrl = `${document.location.protocol}//${document.location.hostname}:${document.location.port}`;
+
+      // ประกอบ link กลับมาเป็น URL เต็ม
+      return linksWithData.map(r => `${baseUrl}${r.link}`);
     } finally {
       setLoadingLinks(false);
     }
@@ -98,8 +102,8 @@ export default function MainQueryEditor({
             setSelectedCountries(vals);
             onCountryChange(vals);
           }}
-          showSearch // ต้องเปิดเพื่อค้นหา
-          optionFilterProp="children" // search ตามข้อความแสดง
+          showSearch
+          optionFilterProp="children"
           filterOption={(input, option) =>
             (option?.children as unknown as string).toLowerCase().includes(input.toLowerCase())
           }
