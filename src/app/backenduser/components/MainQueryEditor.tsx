@@ -126,6 +126,10 @@ export default function MainQueryEditor({
           onChange={e => onQueryChange(e.target.value)}
           className="w-full border px-3 py-2 rounded-lg text-black font-mono focus:ring-2 focus:ring-blue-500"
         />
+        {/* Label ด้านล่างซ้าย */}
+        <p className="mt-1 text-xs text-gray-500">
+          * ถ้ามีการเปรียบเทียบต้องตั้ง parameter เป็น <code className="font-mono">MATCHTEXT</code>
+        </p>
       </div>
 
       {/* Buttons */}
