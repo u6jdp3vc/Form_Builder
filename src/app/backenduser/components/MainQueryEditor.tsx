@@ -148,10 +148,21 @@ export default function MainQueryEditor({
               showCloseButton: true,
               showConfirmButton: true,
               confirmButtonText: "Copy All",
-            }).then(result => {
+            }).then(async result => {
               if (result.isConfirmed) {
-                navigator.clipboard.writeText(links.join("\n"));
-                Swal.fire("Copied!", "All links have been copied.", "success");
+                try {
+                  await navigator.clipboard.writeText(links.join("\n"));
+                  Swal.fire("Copied!", "All links have been copied.", "success");
+                } catch (err) {
+                  console.warn("Clipboard API failed, using fallback:", err);
+                  const textArea = document.createElement("textarea");
+                  textArea.value = links.join("\n");
+                  document.body.appendChild(textArea);
+                  textArea.select();
+                  document.execCommand("copy");
+                  document.body.removeChild(textArea);
+                  Swal.fire("Copied ", "All links have been copied.", "success");
+                }
               }
             });
           }}
