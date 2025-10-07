@@ -19,7 +19,7 @@ export default function DynamicGoogleForm() {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [countries, setCountries] = useState<string[]>([]);
   const [originalSqlQuery, setOriginalSqlQuery] = useState("");
-  const [originalCountry, setOriginalCountry] = useState<string | string[]>("");
+  const [originalCountry, setOriginalCountry] = useState<string[]>([]);
   const [ready, setReady] = useState(false);
   const [questionsMap, setQuestionsMap] = useState<Record<string, Question[]>>({});
   const [dbLoading, setDbLoading] = useState(false);
@@ -83,33 +83,33 @@ export default function DynamicGoogleForm() {
       setOriginalSqlQuery("");
       setSelectedFormId("");
 
-      // ✅ สร้าง default question ให้เลย
       const defaultQs = generateDefaultQuestions("temp_form");
       setQuestions(defaultQs);
       setQuestionsMap(prev => ({ ...prev, ["temp_form"]: defaultQs }));
+      setOriginalCountry([]); // สำหรับ default form
       return;
     }
 
     const f = savedForms.find(f => f.id === id);
     if (!f) return;
 
+    const normCountries = normalizeCountries(f.country);
+
     setFormTitle(f.title);
     setFormDescription(f.description);
-    setSelectedCountry(normalizeCountries(f.country));
+    setSelectedCountry(normCountries);
+    setOriginalCountry([...normCountries]); // ต้อง copy array ด้วย
     setSqlQuery(f.queryText || "");
     setOriginalSqlQuery(f.queryText || "");
-    setOriginalCountry(normalizeCountries(f.country));
     setSelectedFormId(id);
 
     if (questionsMap[id]) {
       setQuestions(questionsMap[id]);
     } else {
-      // ใช้ f.country แทน selectedCountry
-      let qs = await loadQuestions(id, normalizeCountries(f.country));
+      let qs = await loadQuestions(id, normCountries);
       if (!qs || qs.length === 0) qs = generateDefaultQuestions(id);
 
-      // เพิ่ม byFixedValue default
-      qs = qs.map((q: { options: any[] }) => ({
+      qs = qs.map((q: { options: any[]; }) => ({
         ...q,
         options: q.options.map(o => ({
           ...o,
@@ -454,44 +454,39 @@ export default function DynamicGoogleForm() {
 
       // 4️⃣ Update or create shortLinks for selected countries
       for (const country of selectedCountriesArr) {
-        try {
-          await fetch("/api/saveState", {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              selectedFormId: savedId,
-              country,
-              questions: updatedQuestions
-            }),
-            credentials: "include",
-          });
-        } catch (err) {
-          console.error(`Failed to update shortState for ${country}:`, err);
-        }
+        await fetch("/api/saveState", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            selectedFormId: savedId,
+            country,
+            questions: updatedQuestions.map(q => ({
+              ...q,
+              options: q.options.map(o => ({ ...o, countries: [country] }))
+            }))
+          }),
+          credentials: "include",
+        });
       }
 
       // 5️⃣ Delete countries that were removed
-      const removedCountries = Array.isArray(originalCountry)
-        ? originalCountry.filter(c => !selectedCountriesArr.includes(c))
-        : [];
+      const removedCountries = originalCountry
+        .map(c => c.split(",")) // แยก string ที่รวมกันด้วย comma
+        .flat()
+        .filter(c => !selectedCountriesArr.includes(c));
 
-      for (const country of removedCountries) {
-        try {
-          await fetch("/api/removeState", {
-            method: "DELETE",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              formId: savedId,
-              country
-            }),
-            credentials: "include",
-          });
-        } catch (err) {
-          console.error(`Failed to remove country ${country}:`, err);
-        }
+      if (removedCountries.length > 0) {
+        await fetch("/api/removeState", {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ formId: savedId, countries: removedCountries }),
+          credentials: "include",
+        });
       }
+      // 6️⃣ Update originalCountry หลัง saveAll เสร็จ
+      setOriginalCountry([...selectedCountriesArr]);
 
-      // 6️⃣ Update client state
+      // 7️⃣ Update client state
       const newForm: SavedForm = {
         id: savedId,
         title: formTitle,
@@ -506,9 +501,6 @@ export default function DynamicGoogleForm() {
       setQuestionsMap(prev => ({ ...prev, [savedId]: updatedQuestions }));
 
       Swal.fire("Success", isUpdate ? "Updated successfully." : "Created successfully.", "success");
-
-      // ✅ Update originalCountry to match current selected
-      setOriginalCountry([...selectedCountriesArr]);
 
     } catch (err: any) {
       console.error(err);

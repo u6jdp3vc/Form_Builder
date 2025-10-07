@@ -19,28 +19,14 @@
       "options": []
     }
   ],
-  "205": [
+  "206": [
     {
-      "id": "54d0b752-ebce-44c7-b9fa-12e7606794b8",
+      "id": "c0fac58a-1c5d-4451-96ab-a05c0110254b",
       "title": "Default Question",
       "description": "Auto generated question",
       "type": "text",
-      "formId": "205",
-      "options": [
-        {
-          "id": "77f45e78-51f2-4709-b50d-a8b74ed02d6c",
-          "label": "code",
-          "paramName": "@ac",
-          "value": "select name,code from crm",
-          "checked": false,
-          "countries": [
-            "AS-DTGTHA",
-            "AS-DTGBTN"
-          ],
-          "type": "dropdown",
-          "byFixedValue": false
-        }
-      ]
+      "formId": "206",
+      "options": []
     }
   ]
 }
