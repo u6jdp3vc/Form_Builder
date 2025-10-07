@@ -16,24 +16,22 @@ export async function GET(req: NextRequest) {
   if (!token) return NextResponse.json({ error: "No token" }, { status: 401 });
 
   try {
-    // ตรวจสอบ token เก่า
-    let payload = await validateToken(token);
+    // ตรวจสอบ token แต่จะไม่พึ่ง level ใน token
+    const payload = await validateToken(token);
     if (!payload) return NextResponse.json({ error: "Invalid token" }, { status: 401 });
 
-    // 🔄 เช็ค level ล่าสุดจาก DB
+    // ดึง level ล่าสุดจาก DB โดยตรง
     const pool = await sql.connect(configBase);
     const result = await pool
       .request()
       .input("username", sql.VarChar, payload.username)
       .query("SELECT level FROM excel_login WHERE username = @username");
 
-    const currentLevel = result.recordset[0]?.level ?? payload.level;
+    const currentLevel = result.recordset[0]?.level ?? 0;
 
-    // 🔑 ถ้า level ใน DB เปลี่ยน ให้สร้าง token ใหม่
+    // สร้าง token ใหม่ถ้า level เปลี่ยน
     if (currentLevel !== payload.level) {
-      payload.level = currentLevel;
       const newToken = await createToken(payload.username, currentLevel);
-
       const res = NextResponse.json({ username: payload.username, level: currentLevel });
       res.cookies.set("token", newToken, { httpOnly: true, path: "/", maxAge: 3600 });
       return res;

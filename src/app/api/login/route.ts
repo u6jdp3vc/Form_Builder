@@ -11,7 +11,7 @@ const config = {
 };
 
 export async function POST(req: NextRequest) {
-  const { username, password } = await req.json();
+  const { username, password, redirect } = await req.json();
   const pool = await sql.connect(config);
   const nineHours = 9 * 60 * 60;
 
@@ -30,10 +30,41 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: false, message: "บัญชีถูกระงับ" });
   }
 
-  const token = await createToken(user.username, user.level);
-  const redirectUrl = user.level > 50 ? "/backenduser" : "/frontenduser";
+  // อ่าน redirect parameter จาก referer
+  const redirectHeader = req.headers.get("referer") || "";
+  const url = new URL(redirectHeader, process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000");
+  const redirectPath = url.pathname;
 
-  const res = NextResponse.json({ success: true, redirectUrl });
+  // ฟังก์ชันช่วยลบ cookies
+  const clearCookies = (message: string) => {
+    const res = NextResponse.json({ success: false, message });
+    res.cookies.set("token", "", { path: "/", maxAge: 0 });
+    res.cookies.set("username", "", { path: "/", maxAge: 0 });
+    res.cookies.set("level", "", { path: "/", maxAge: 0 });
+    return res;
+  };
+
+  // ❌ level < 50 → ไม่มีสิทธิ์
+  if (user.level < 50) {
+    return clearCookies("You do not have permission to access this page.");
+  }
+
+  // ⚠️ level == 50 แต่ไม่มี redirect → ห้ามเข้าโดยตรง
+
+
+  if (user.level === 50 && !redirect) {
+    return clearCookies("Please access this page through the provided link only.");
+  }
+
+  // ✅ ผ่านทุกเงื่อนไข
+  const token = await createToken(user.username, user.level);
+  const redirectUrl = user.level > 50 ? "/backenduser" : redirectPath || "/frontenduser";
+
+  const res = NextResponse.json({
+    success: true,
+    level: user.level,
+    redirectUrl,
+  });
 
   res.cookies.set("token", token, {
     httpOnly: true,
@@ -56,4 +87,3 @@ export async function POST(req: NextRequest) {
 
   return res;
 }
-

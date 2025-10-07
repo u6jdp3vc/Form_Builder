@@ -1,49 +1,78 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import Swal from "sweetalert2";
 import { Eye, EyeOff } from "lucide-react";
 
 export default function LoginPageClient() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const redirect = searchParams.get("redirect");
+  const [redirectUrl, setRedirectUrl] = useState<string | null>(null);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const [loading, setLoading] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
 
+  // อ่าน redirect param ตอน mount
   useEffect(() => {
-    const savedUsername = localStorage.getItem("rememberUsername");
-    const savedPassword = localStorage.getItem("rememberPassword");
-    if (savedUsername && savedPassword) {
-      setUsername(savedUsername);
-      setPassword(savedPassword);
-      setRememberMe(true);
+    if (typeof window === "undefined") return;
+
+    const params = new URLSearchParams(window.location.search);
+    const redirectFromUrl = params.get("redirect");
+
+    if (redirectFromUrl) {
+      // ถ้ามี param มาใหม่ → บันทึก
+      setRedirectUrl(redirectFromUrl);
+      localStorage.setItem("redirectUrl", redirectFromUrl);
+    } else {
+      // ถ้าไม่มี param → ใช้ค่าเก่าจาก localStorage แต่ไม่ลบ
+      const savedRedirect = localStorage.getItem("redirectUrl");
+      if (savedRedirect) setRedirectUrl(savedRedirect);
     }
 
+    console.log("Initial Redirect URL:", redirectFromUrl || localStorage.getItem("redirectUrl"));
+  }, []);
+
+  // ตรวจสอบ login ตอน mount
+  useEffect(() => {
     const checkLogin = async () => {
       try {
         const res = await fetch("/api/getPayload", { credentials: "include" });
-        if (res.status === 401) {
+        if (!res.ok) {
           setLoading(false);
           return;
         }
-        if (!res.ok) throw new Error("Failed to fetch payload");
+
         const data = await res.json();
-        const level = data.level || 0;
-        if (level > 50) router.replace("/backenduser");
-        else if (level === 50) router.replace("/frontenduser");
-        else setLoading(false);
+        const level = Number(data.level) || 0;
+        const redirect = localStorage.getItem("redirectUrl") || redirectUrl;
+        const currentPath = window.location.pathname;
+
+        // ถ้ามี redirect URL และ level >=50 → redirect ไปเลย
+        if (redirect && level >= 50) {
+          console.log("Redirecting to saved redirect URL:", redirect);
+
+          window.location.href = decodeURIComponent(redirect);
+          return;
+        }
+
+        // level >50 → ไป backenduser ถ้า path ไม่ใช่ backenduser
+        if (level > 50 && currentPath !== "/backenduser") {
+          router.replace("/backenduser");
+          return;
+        }
+
+        // level <=50 และไม่มี redirect → อยู่หน้า login
+        setLoading(false);
       } catch (err) {
         console.error(err);
         setLoading(false);
       }
     };
+
     checkLogin();
-  }, [router]);
+  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,42 +80,53 @@ export default function LoginPageClient() {
       const res = await fetch("/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({ username, password, redirect: redirectUrl }),
       });
       const data = await res.json();
-      if (data.success) {
-        if (rememberMe) {
-          localStorage.setItem("rememberUsername", username);
-          localStorage.setItem("rememberPassword", password);
-        } else {
-          localStorage.removeItem("rememberUsername");
-          localStorage.removeItem("rememberPassword");
-        }
 
-        await Swal.fire({
-          icon: "success",
-          title: "Login Successful",
-          text: "Login successful. Redirecting to the next page...",
-          timer: 1500,
-          showConfirmButton: false,
-          timerProgressBar: true,
+      if (!data.success) {
+        Swal.fire({
+          icon: "error",
+          title: "Login Failed",
+          text: data.message || "An error occurred.",
         });
-
-        // ✅ เช็คว่ามี redirect query param ไหม
-        if (redirect) {
-          router.replace(redirect); // ใช้ router.replace ดีกว่า window.location.href
-        } else if (data.redirectUrl) {
-          window.location.href = data.redirectUrl; // หรือ router.replace(data.redirectUrl)
-        } else {
-          router.replace("/frontenduser"); // fallback
-        }
         return;
       }
-      Swal.fire({
-        icon: "error",
-        title: "Login Failed",
-        text: data.message || "An error occurred.",
+
+      // บันทึก remember me
+      if (rememberMe) {
+        localStorage.setItem("rememberUsername", username);
+        localStorage.setItem("rememberPassword", password);
+      } else {
+        localStorage.removeItem("rememberUsername");
+        localStorage.removeItem("rememberPassword");
+      }
+
+      await Swal.fire({
+        icon: "success",
+        title: "Login Successful",
+        text: "Redirecting...",
+        timer: 1200,
+        showConfirmButton: false,
+        timerProgressBar: true,
       });
+
+      setTimeout(() => {
+        const redirect = localStorage.getItem("redirectUrl") || redirectUrl;
+        const level = Number(data.level) || 0;
+
+        if (redirect && level >= 50) {
+          // level >=50 → redirect URL ได้
+          console.log("Redirecting to redirect URL:", redirect);
+          window.location.href = decodeURIComponent(redirect);
+        } else if (level > 50) {
+          console.log("Redirecting to /backenduser");
+          window.location.href = "/backenduser";
+        } else {
+          console.log("Redirecting to /");
+          window.location.href = "/";
+        }
+      }, 100);
     } catch (err) {
       console.error(err);
       Swal.fire({
@@ -97,7 +137,8 @@ export default function LoginPageClient() {
     }
   };
 
-  if (loading) return <p className="text-center mt-10 text-white">Loading...</p>;
+  if (loading)
+    return <p className="text-center mt-10 text-white">Loading...</p>;
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-r from-blue-700 via-blue-800 to-blue-900">

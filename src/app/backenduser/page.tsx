@@ -408,7 +408,7 @@ export default function DynamicGoogleForm() {
     try {
       setDbLoading(true);
 
-      // Save main form
+      // 1️⃣ Save main form
       const res = await fetch("/api/forms", {
         method,
         headers: { "Content-Type": "application/json" },
@@ -421,25 +421,24 @@ export default function DynamicGoogleForm() {
         }),
         credentials: "include",
       });
-
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to save form");
 
       const savedId = String(data.id);
       setSelectedFormId(savedId);
 
-      // Prepare updated questions
+      // 2️⃣ Prepare updated questions
       const updatedQuestions = questions.map(q => ({
         ...q,
         formId: savedId,
         options: q.options.map(o => ({
           ...o,
           byFixedValue: o.byFixedValue ?? false,
-          countries: (o.countries || []).filter((c: string) => selectedCountriesArr.includes(c))
+          countries: (o.countries || []).filter(c => selectedCountriesArr.includes(c))
         }))
       }));
 
-      // Save questions to backend
+      // 3️⃣ Save questions for selected countries
       const qRes = await fetch("/api/saveQuestions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -450,11 +449,10 @@ export default function DynamicGoogleForm() {
         }),
         credentials: "include",
       });
-
       const qData = await qRes.json();
       if (!qRes.ok || !qData.success) throw new Error(qData.error || "Failed to save questions");
 
-      // ✅ Update short links for each country (PUT /api/saveState)
+      // 4️⃣ Update or create shortLinks for selected countries
       for (const country of selectedCountriesArr) {
         try {
           await fetch("/api/saveState", {
@@ -472,7 +470,28 @@ export default function DynamicGoogleForm() {
         }
       }
 
-      // Update state in client
+      // 5️⃣ Delete countries that were removed
+      const removedCountries = Array.isArray(originalCountry)
+        ? originalCountry.filter(c => !selectedCountriesArr.includes(c))
+        : [];
+
+      for (const country of removedCountries) {
+        try {
+          await fetch("/api/removeState", {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              formId: savedId,
+              country
+            }),
+            credentials: "include",
+          });
+        } catch (err) {
+          console.error(`Failed to remove country ${country}:`, err);
+        }
+      }
+
+      // 6️⃣ Update client state
       const newForm: SavedForm = {
         id: savedId,
         title: formTitle,
@@ -487,6 +506,9 @@ export default function DynamicGoogleForm() {
       setQuestionsMap(prev => ({ ...prev, [savedId]: updatedQuestions }));
 
       Swal.fire("Success", isUpdate ? "Updated successfully." : "Created successfully.", "success");
+
+      // ✅ Update originalCountry to match current selected
+      setOriginalCountry([...selectedCountriesArr]);
 
     } catch (err: any) {
       console.error(err);

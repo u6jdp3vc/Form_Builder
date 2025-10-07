@@ -1,12 +1,13 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { MainQueryEditorProps } from "../types";
 import { Select } from "antd";
 const { Option } = Select;
 import Swal from "sweetalert2";
 import { countryMaps } from "@/app/countryMaps";
 import { generateLinksForCountries } from "@/app/backenduser/utils/generateLinkHref";
+import { Check } from "lucide-react";
 
 export default function MainQueryEditor({
   formTitle,
@@ -21,13 +22,10 @@ export default function MainQueryEditor({
 }: MainQueryEditorProps) {
   const [selectedCountries, setSelectedCountries] = React.useState<string[]>([]);
   const [loadingLinks, setLoadingLinks] = React.useState(false);
-
-  // โหลด countries จาก DB ตอนเลือก form
-  const firstLoadRef = React.useRef(true);
+  const [copied, setCopied] = useState(false);
 
   React.useEffect(() => {
     if (!selectedFormId) return;
-    if (!firstLoadRef.current) return; // โหลดครั้งแรกแล้วไม่ต้อง fetch ใหม่
 
     const fetchCountries = async () => {
       try {
@@ -42,8 +40,7 @@ export default function MainQueryEditor({
     };
 
     fetchCountries();
-    firstLoadRef.current = false;
-  }, [selectedFormId, onCountryChange]);
+  }, [selectedFormId]);
 
   const handleGenerateLinks = async () => {
     if (!selectedFormId || !selectedCountries.length) return [];
@@ -128,7 +125,7 @@ export default function MainQueryEditor({
         />
         {/* Label ด้านล่างซ้าย */}
         <p className="mt-1 text-xs text-gray-500">
-          * ถ้ามีการเปรียบเทียบต้องตั้ง parameter เป็น <code className="font-mono">MATCHTEXT</code>
+          * If there is a comparison, the parameter must be set as <code className="font-mono">MATCHTEXT</code>
         </p>
       </div>
 
@@ -139,21 +136,27 @@ export default function MainQueryEditor({
           onClick={async () => {
             const links = await handleGenerateLinks();
 
-            if (!links.length) return Swal.fire("Error", "Please generate links first", "error");
+            if (!links.length)
+              return Swal.fire("Error", "Please generate links first", "error");
 
+            // ✅ แสดงลิงก์โดยมีปุ่ม Copy All ใน popup
             Swal.fire({
               title: "Generated Links",
-              html: links.map(link => `<div><a href="${link}" target="_blank">${link}</a></div>`).join(""),
+              html: links
+                .map(
+                  (link) => `<div><a href="${link}" target="_blank">${link}</a></div>`
+                )
+                .join(""),
               icon: "success",
               showCloseButton: true,
               showConfirmButton: true,
               confirmButtonText: "Copy All",
-            }).then(async result => {
+            }).then(async (result) => {
               if (result.isConfirmed) {
                 try {
                   await navigator.clipboard.writeText(links.join("\n"));
-                  Swal.fire("Copied!", "All links have been copied.", "success");
                 } catch (err) {
+                  // fallback สำหรับ browser เก่าที่ไม่รองรับ Clipboard API
                   console.warn("Clipboard API failed, using fallback:", err);
                   const textArea = document.createElement("textarea");
                   textArea.value = links.join("\n");
@@ -161,15 +164,32 @@ export default function MainQueryEditor({
                   textArea.select();
                   document.execCommand("copy");
                   document.body.removeChild(textArea);
-                  Swal.fire("Copied ", "All links have been copied.", "success");
                 }
+
+                // ✅ ไม่ขึ้น popup, แค่โชว์ติ๊กบนปุ่ม
+                setCopied(true);
+                setTimeout(() => setCopied(false), 2000);
               }
             });
           }}
           disabled={loadingLinks}
-          className={`px-6 py-2 rounded-lg ${loadingLinks ? "bg-gray-400" : "bg-blue-600 text-white hover:bg-blue-700"}`}
+          className={`flex items-center gap-2 px-6 py-2 rounded-lg transition-all duration-300 ${loadingLinks
+              ? "bg-gray-400 cursor-not-allowed"
+              : copied
+                ? "bg-green-600 text-white"
+                : "bg-blue-600 text-white hover:bg-blue-700"
+            }`}
         >
-          {loadingLinks ? "Generating..." : "Generate Links"}
+          {loadingLinks ? (
+            "Generating..."
+          ) : copied ? (
+            <>
+              <Check size={18} />
+              Copied
+            </>
+          ) : (
+            "Generate Links"
+          )}
         </button>
       </div>
     </div>

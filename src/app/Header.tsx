@@ -55,7 +55,12 @@ export default function Header() {
       });
 
       if (result.isConfirmed) {
+        // เรียก API logout เพื่อ clear cookie
         await fetch("/api/logout", { method: "POST" });
+
+        localStorage.removeItem("redirectUrl");
+
+        // แสดง success และ redirect
         await Swal.fire({
           icon: "success",
           title: "Logged out successfully.",
@@ -63,6 +68,7 @@ export default function Header() {
           showConfirmButton: false,
           timerProgressBar: true,
         });
+
         window.location.href = "/";
       }
     } catch (err) {

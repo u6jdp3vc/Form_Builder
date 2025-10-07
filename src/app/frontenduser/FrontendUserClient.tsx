@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Swal from "sweetalert2";
 import { useSearchParams } from "next/navigation";
 import { Question, SavedForm, FrontendUserProps } from "./types";
@@ -8,6 +8,7 @@ import QuestionCard from './components/QuestionCard';
 import ExportButton from "./components/ExportButton";
 import { Form } from "antd";
 import { countryMap } from "@/app/countryMap";
+import { useRouter } from "next/navigation";
 
 export default function FrontendUser({ state }: FrontendUserProps) {
     const [savedForms, setSavedForms] = useState<SavedForm[]>([]);
@@ -19,6 +20,18 @@ export default function FrontendUser({ state }: FrontendUserProps) {
     const stateParam = searchParams.get("state");
     const [dbLoading, setDbLoading] = useState(false);
     const [dbReady, setDbReady] = useState(false);
+    const router = useRouter();
+    const hasRedirected = useRef(false);
+
+    useEffect(() => {
+        if (!state || !state.redirectUrl) return;
+        const currentPath = window.location.pathname;
+        // redirect เฉพาะกรณี path ไม่ตรง และยังไม่เคย redirect
+        if (state.redirectUrl !== currentPath && !hasRedirected.current) {
+            hasRedirected.current = true;
+            router.push(state.redirectUrl);
+        }
+    }, [state, router]);
 
     // Load forms
     useEffect(() => {
@@ -340,6 +353,11 @@ export default function FrontendUser({ state }: FrontendUserProps) {
 
     const selectedForm = savedForms.find(f => f.id === selectedFormId);
 
+    // ย้าย guard มาไว้ตรงนี้
+    if (!state || !state.selectedFormId) {
+        return <div className="text-center mt-10 text-blue-900">Loading...</div>;
+    }
+
     return (
         <div className="min-h-screen bg-blue-50 p-8 text-black">
             <h1 className="text-4xl font-extrabold text-center mb-10">
@@ -361,16 +379,24 @@ export default function FrontendUser({ state }: FrontendUserProps) {
             {/* Questions */}
             <div className="max-w-4xl mx-auto grid gap-6">
                 <Form form={form} layout="vertical" onFinish={() => console.log("Submit")}>
-                    {questions.map(q => (
-                        <QuestionCard
-                            key={q.id}
-                            question={q}
-                            onUpdateOptionValue={updateOptionValue}
-                            form={form}
-                            country={selectedCountry}
-                            className="bg-white shadow-md rounded-lg border border-blue-200 text-black"
-                        />
-                    ))}
+                    {questions
+                        .filter(q => {
+                            // ตรวจสอบว่า question มีค่าอย่างน้อยใน options
+                            return q.options.some(o => {
+                                if (o.type === "multiselect") return Array.isArray(o.selectedValues) && o.selectedValues.length > 0;
+                                return o.selectedValue || o.value;
+                            });
+                        })
+                        .map(q => (
+                            <QuestionCard
+                                key={q.id}
+                                question={q}
+                                onUpdateOptionValue={updateOptionValue}
+                                form={form}
+                                country={selectedCountry}
+                                className="bg-white shadow-md rounded-lg border border-blue-200 text-black"
+                            />
+                        ))}
                 </Form>
 
                 {/* Action Buttons (Export & Link) */}

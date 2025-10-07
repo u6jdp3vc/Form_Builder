@@ -6,7 +6,6 @@ export async function middleware(req: NextRequest) {
   const url = req.nextUrl.clone();
   const token = req.cookies.get("token")?.value;
 
-  // ไม่มี token → redirect ไป login พร้อมแนบ redirect param
   if (!token) {
     const loginUrl = req.nextUrl.clone();
     loginUrl.pathname = "/";
@@ -14,7 +13,6 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  // decode token
   let payload;
   try {
     payload = await validateToken(token);
@@ -25,17 +23,29 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  const level = payload?.level || 0;
+  const level = Number(payload?.level) || 0;
 
-  // Backenduser
+  // อ่าน redirect param จาก query
+  const redirect = url.searchParams.get("redirect");
+
+  // backenduser: level ต้อง > 50
   if (url.pathname.startsWith("/backenduser") && level <= 50) {
-    url.pathname = "/frontenduser";
-    return NextResponse.redirect(url);
+    if (redirect) {
+      // มี redirect → อนุญาตให้ไป redirect URL เดิม
+      url.pathname = redirect;
+      url.searchParams.delete("redirect");
+      return NextResponse.redirect(url);
+    } else {
+      // ไม่มี redirect → redirect /
+      url.pathname = "/";
+      return NextResponse.redirect(url);
+    }
   }
 
-  // Frontenduser
+  // frontenduser: level ต้อง >= 50 หรือ level < 50 → redirect /
   if (url.pathname.startsWith("/frontenduser") && level < 50) {
     url.pathname = "/";
+    url.searchParams.set("redirect", url.pathname);
     return NextResponse.redirect(url);
   }
 
