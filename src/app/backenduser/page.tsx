@@ -161,7 +161,9 @@ export default function DynamicGoogleForm() {
         setSelectedFormsForDelete([]);
         setBulkMode(false);
 
-        Swal.fire("Deleted!", "Selected forms have been deleted.", "success");
+        Swal.fire("Deleted!", "Selected forms have been deleted.", "success").then(() => {
+          window.location.reload();
+        });
       } catch (err: any) {
         console.error(err);
         Swal.fire("Error", err.message || "Failed to delete forms", "error");
