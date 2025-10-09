@@ -42,7 +42,6 @@ const QuestionCard = ({ question, form, country, onUpdateOptionValue }: Question
     const handleOpenChange = (optionId: string, isOpen: boolean) => {
         setOpenMap(prev => ({ ...prev, [optionId]: isOpen }));
     };
-
     // ฟังก์ชันดึงตัวเลือกจาก SQL query
     const fetchOptions = async (country: string) => {
         setDbLoading(true);
@@ -109,8 +108,8 @@ const QuestionCard = ({ question, form, country, onUpdateOptionValue }: Question
     };
 
     React.useEffect(() => {
-        fetchOptions(country);
-    }, [generateLinksForCountries]);
+    fetchOptions(country);
+}, [country]);
 
     return (
         <div className="bg-white p-6 rounded-xl shadow-md border border-gray-200 hover:shadow-lg transition-shadow">
@@ -211,7 +210,8 @@ const QuestionCard = ({ question, form, country, onUpdateOptionValue }: Question
                                 mode="multiple"
                                 placeholder={`Please select ${o.label}`}
                                 value={o.selectedValues?.map((v: any) => (typeof v === "object" ? v.code : v)) || []}
-                                onChange={(values) => onUpdateOptionValue(question.id, o.id, values)}
+                                onChange={(values) => 
+                                    onUpdateOptionValue(question.id, o.id, values)}
                                 options={optionsMap[o.id]?.map(opt => ({
                                     label: `${opt.name} (${opt.code})`,
                                     value: opt.code

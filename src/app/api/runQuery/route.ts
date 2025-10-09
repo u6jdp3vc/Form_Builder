@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import sql from "mssql";
 import fs from "fs";
 import path from "path";
-import { countryDbMap } from "@/app/countryDbMap";
+import { countryDbMap } from "@/app/types/countryDbMap";
 
 const configBase = {
   user: process.env.DB_USER!,

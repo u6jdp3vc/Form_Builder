@@ -1,7 +1,7 @@
 // /api/loadCountryDB.ts
 import { NextRequest, NextResponse } from "next/server";
 import sql from "mssql";
-import { countryDbMap } from "@/app/countryDbMap";
+import { countryDbMap } from "@/app/types/countryDbMap";
 
 const config = {
   user: process.env.DB_USER!,

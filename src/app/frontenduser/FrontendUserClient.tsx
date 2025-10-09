@@ -7,7 +7,7 @@ import { Question, SavedForm, FrontendUserProps } from "./types";
 import QuestionCard from './components/QuestionCard';
 import ExportButton from "./components/ExportButton";
 import { Form } from "antd";
-import { countryMap } from "@/app/countryMap";
+import { countryMap } from "@/app/types/countryMap";
 import { useRouter } from "next/navigation";
 
 export default function FrontendUser({ state }: FrontendUserProps) {
@@ -379,24 +379,15 @@ export default function FrontendUser({ state }: FrontendUserProps) {
             {/* Questions */}
             <div className="max-w-4xl mx-auto grid gap-6">
                 <Form form={form} layout="vertical" onFinish={() => console.log("Submit")}>
-                    {questions
-                        .filter(q => {
-                            // ตรวจสอบว่า question มีค่าอย่างน้อยใน options
-                            return q.options.some(o => {
-                                if (o.type === "multiselect") return Array.isArray(o.selectedValues) && o.selectedValues.length > 0;
-                                return o.selectedValue || o.value;
-                            });
-                        })
-                        .map(q => (
-                            <QuestionCard
-                                key={q.id}
-                                question={q}
-                                onUpdateOptionValue={updateOptionValue}
-                                form={form}
-                                country={selectedCountry}
-                                className="bg-white shadow-md rounded-lg border border-blue-200 text-black"
-                            />
-                        ))}
+                    {questions.map(q => (
+                        <QuestionCard
+                            key={q.id}
+                            question={q}
+                            onUpdateOptionValue={updateOptionValue}
+                            form={form}
+                            country={selectedCountry}
+                        />
+                    ))}
                 </Form>
 
                 {/* Action Buttons (Export & Link) */}

@@ -1,4 +1,4 @@
-import { countryMaps } from "@/app/countryMaps";
+import { countryMaps } from "@/app/types/countryMaps";
 
 export const generateLinksForCountries = async (
   selectedFormId: string,

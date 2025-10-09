@@ -5,7 +5,7 @@ import { MainQueryEditorProps } from "../types";
 import { Select } from "antd";
 const { Option } = Select;
 import Swal from "sweetalert2";
-import { countryMaps } from "@/app/countryMaps";
+import { countryMaps } from "@/app/types/countryMaps";
 import { generateLinksForCountries } from "@/app/backenduser/utils/generateLinkHref";
 import { Check } from "lucide-react";
 
