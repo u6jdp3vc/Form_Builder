@@ -323,81 +323,6 @@ export default function DynamicGoogleForm() {
     );
   };
 
-  // Save or update main query
-  const handleSaveMainQuery = async () => {
-    if (!formTitle || !selectedCountry) {
-      return Swal.fire("Error", "Please enter the form name and select a country.", "error");
-    }
-
-    const isUpdate = Boolean(selectedFormId);
-    const method = isUpdate ? "PUT" : "POST";
-
-    try {
-      setDbLoading(true);
-      const res = await fetch("/api/forms", {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title: formTitle,
-          description: formDescription,
-          queryText: sqlQuery,
-          country: selectedCountry,
-          ...(isUpdate ? { id: selectedFormId } : {}),
-        }),
-        credentials: "include",
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to save Main Query");
-
-      const savedId = String(data.id || data.formId);
-      setSelectedFormId(savedId);
-
-      let finalQuestions: Question[] = [];
-
-      if (!isUpdate) {
-        // ถ้าเป็นฟอร์มใหม่ → สร้าง default question อัตโนมัติ
-        finalQuestions = generateDefaultQuestions(savedId);
-
-        // save questions ไป backend ทันที
-        await fetch("/api/saveQuestions", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            formId: savedId,
-            countries: Array.isArray(selectedCountry) ? selectedCountry : [selectedCountry],
-            questions: finalQuestions,
-          }),
-          credentials: "include",
-        });
-      } else {
-        // ถ้า update → ใช้ questions เดิม
-        finalQuestions = questions;
-      }
-
-      const newForm: SavedForm = {
-        id: savedId,
-        title: formTitle,
-        description: formDescription,
-        country: selectedCountry,
-        queryText: sqlQuery,
-        questions: finalQuestions,
-      };
-
-      setSavedForms(prev => isUpdate ? prev.map(f => f.id === savedId ? newForm : f) : [newForm, ...prev]);
-      setQuestions(finalQuestions);
-      setQuestionsMap(prev => ({ ...prev, [savedId]: finalQuestions }));
-
-      Swal.fire("Success", isUpdate ? "Updated successfully." : "Created successfully.", "success");
-
-    } catch (err: any) {
-      console.error("Error saving form:", err);
-      Swal.fire("Error", err.message || "Error saving Main Query", "error");
-    } finally {
-      setDbLoading(false);
-    }
-  };
-
   // Save Main + Questions พร้อมกัน
   const handleSaveAll = async () => {
     if (!formTitle || !selectedCountry.length) {
@@ -559,7 +484,6 @@ export default function DynamicGoogleForm() {
           onCountryChange={handleCountryChange}
           onQueryChange={setSqlQuery}
           onRunQuery={() => { }}
-          onSaveQuery={handleSaveMainQuery}
           selectedFormId={selectedFormId}
           className="text-black"
         />

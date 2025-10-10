@@ -7,31 +7,22 @@ import { Eye, EyeOff } from "lucide-react";
 
 export default function LoginPageClient() {
   const router = useRouter();
-  const [redirectUrl, setRedirectUrl] = useState<string | null>(null);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [redirectUrl, setRedirectUrl] = useState<string | null>(null);
   const [rememberMe, setRememberMe] = useState(false);
   const [loading, setLoading] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
 
-  // อ่าน redirect param ตอน mount
+  // อ่าน redirect param หรือค่าเก่าจาก localStorage
   useEffect(() => {
     if (typeof window === "undefined") return;
-
     const params = new URLSearchParams(window.location.search);
-    const redirectFromUrl = params.get("redirect");
-
-    if (redirectFromUrl) {
-      // ถ้ามี param มาใหม่ → บันทึก
-      setRedirectUrl(redirectFromUrl);
-      localStorage.setItem("redirectUrl", redirectFromUrl);
-    } else {
-      // ถ้าไม่มี param → ใช้ค่าเก่าจาก localStorage แต่ไม่ลบ
-      const savedRedirect = localStorage.getItem("redirectUrl");
-      if (savedRedirect) setRedirectUrl(savedRedirect);
+    const redirect = params.get("redirect") || localStorage.getItem("redirectUrl");
+    if (redirect) {
+      setRedirectUrl(redirect);
+      localStorage.setItem("redirectUrl", redirect);
     }
-
-    console.log("Initial Redirect URL:", redirectFromUrl || localStorage.getItem("redirectUrl"));
   }, []);
 
   // ตรวจสอบ login ตอน mount
@@ -39,40 +30,27 @@ export default function LoginPageClient() {
     const checkLogin = async () => {
       try {
         const res = await fetch("/api/getPayload", { credentials: "include" });
-        if (!res.ok) {
-          setLoading(false);
-          return;
-        }
+        if (!res.ok) return setLoading(false);
 
         const data = await res.json();
         const level = Number(data.level) || 0;
         const redirect = localStorage.getItem("redirectUrl") || redirectUrl;
-        const currentPath = window.location.pathname;
+        const path = window.location.pathname;
 
-        // ถ้ามี redirect URL และ level >=50 → redirect ไปเลย
-        if (redirect && level >= 50) {
-          console.log("Redirecting to saved redirect URL:", redirect);
+        if (redirect && level >= 50)
+          return (window.location.href = decodeURIComponent(redirect));
 
-          window.location.href = decodeURIComponent(redirect);
-          return;
-        }
+        if (level > 50 && path !== "/backenduser")
+          return router.replace("/backenduser");
 
-        // level >50 → ไป backenduser ถ้า path ไม่ใช่ backenduser
-        if (level > 50 && currentPath !== "/backenduser") {
-          router.replace("/backenduser");
-          return;
-        }
-
-        // level <=50 และไม่มี redirect → อยู่หน้า login
         setLoading(false);
-      } catch (err) {
-        console.error(err);
+      } catch {
         setLoading(false);
       }
     };
 
     checkLogin();
-  }, []);
+  }, [redirectUrl, router]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -84,23 +62,14 @@ export default function LoginPageClient() {
       });
       const data = await res.json();
 
-      if (!data.success) {
-        Swal.fire({
-          icon: "error",
-          title: "Login Failed",
-          text: data.message || "An error occurred.",
-        });
-        return;
-      }
+      if (!data.success)
+        return Swal.fire("Login Failed", data.message || "An error occurred.", "error");
 
-      // บันทึก remember me
-      if (rememberMe) {
-        localStorage.setItem("rememberUsername", username);
-        localStorage.setItem("rememberPassword", password);
-      } else {
-        localStorage.removeItem("rememberUsername");
-        localStorage.removeItem("rememberPassword");
-      }
+      rememberMe
+        ? (localStorage.setItem("rememberUsername", username),
+           localStorage.setItem("rememberPassword", password))
+        : (localStorage.removeItem("rememberUsername"),
+           localStorage.removeItem("rememberPassword"));
 
       await Swal.fire({
         icon: "success",
@@ -111,54 +80,39 @@ export default function LoginPageClient() {
         timerProgressBar: true,
       });
 
-      setTimeout(() => {
-        const redirect = localStorage.getItem("redirectUrl") || redirectUrl;
-        const level = Number(data.level) || 0;
+      const redirect = localStorage.getItem("redirectUrl") || redirectUrl;
+      const level = Number(data.level) || 0;
 
-        if (redirect && level >= 50) {
-          // level >=50 → redirect URL ได้
-          console.log("Redirecting to redirect URL:", redirect);
-          window.location.href = decodeURIComponent(redirect);
-        } else if (level > 50) {
-          console.log("Redirecting to /backenduser");
-          window.location.href = "/backenduser";
-        } else {
-          console.log("Redirecting to /");
-          window.location.href = "/";
-        }
-      }, 100);
-    } catch (err) {
-      console.error(err);
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: "An error occurred during login.",
-      });
+      if (redirect && level >= 50)
+        window.location.href = decodeURIComponent(redirect);
+      else if (level > 50)
+        window.location.href = "/backenduser";
+      else
+        window.location.href = "/";
+    } catch {
+      Swal.fire("Error", "An error occurred during login.", "error");
     }
   };
 
-  if (loading)
-    return <p className="text-center mt-10 text-white">Loading...</p>;
+  if (loading) return <p className="text-center mt-10 text-white">Loading...</p>;
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-r from-blue-700 via-blue-800 to-blue-900">
       <form
         onSubmit={handleLogin}
-        className="bg-blue-500/90 backdrop-blur-md p-10 rounded-3xl shadow-2xl w-96 max-w-full flex flex-col items-center"
+        className="bg-blue-500/90 backdrop-blur-md p-10 rounded-3xl shadow-2xl w-96 flex flex-col items-center"
       >
-        <div className="mb-6 flex justify-center">
-          <img
-            src="https://dth.travel/wp-content/uploads/2025/07/White_wo_FD.png"
-            alt="Login Header"
-            className="w-32 sm:w-36 md:w-40 ml-10"
-          />
-        </div>
+        <img
+          src="https://dth.travel/wp-content/uploads/2025/07/White_wo_FD.png"
+          alt="Logo"
+          className="w-40 mb-6"
+        />
         <input
           type="text"
           placeholder="Username"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
-          className="w-full mb-4 p-3 border border-blue-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 bg-blue-100 text-blue-900 transition"
+          className="w-full mb-4 p-3 border border-blue-300 rounded-xl focus:ring-2 focus:ring-blue-400 bg-blue-100 text-blue-900"
         />
         <div className="w-full mb-2 relative">
           <input
@@ -166,7 +120,7 @@ export default function LoginPageClient() {
             placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full p-3 border border-blue-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 bg-blue-100 text-blue-900 transition pr-10"
+            className="w-full p-3 border border-blue-300 rounded-xl focus:ring-2 focus:ring-blue-400 bg-blue-100 text-blue-900 pr-10"
           />
           <button
             type="button"
@@ -182,11 +136,11 @@ export default function LoginPageClient() {
             checked={rememberMe}
             onChange={(e) => setRememberMe(e.target.checked)}
           />
-          Remember Password
+          <span>Remember Password</span>
         </label>
         <button
           type="submit"
-          className="w-full bg-blue-700 hover:bg-blue-800 text-white font-semibold py-3 rounded-xl transition transform hover:-translate-y-1 cursor-pointer"
+          className="w-full bg-blue-700 hover:bg-blue-800 text-white font-semibold py-3 rounded-xl transition hover:-translate-y-1 cursor-pointer"
         >
           Login
         </button>

@@ -59,7 +59,6 @@ export interface MainQueryEditorProps {
   onCountryChange: (val: string[]) => void; // เปลี่ยนเป็น array ตรง ๆ
   onQueryChange: (val: string) => void;
   onRunQuery: () => void;
-  onSaveQuery: () => void;
   className?: string;
 }
 
