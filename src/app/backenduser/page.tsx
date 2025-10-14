@@ -459,9 +459,43 @@ export default function DynamicGoogleForm() {
 
           {/* Manage Forms Dropdown */}
           <Dropdown
-            menu={{ items: menuItems }}
             trigger={['click']}
             placement="bottomRight"
+            dropdownRender={() => (
+              <div
+                className="p-3 bg-white rounded shadow w-72"
+                onClick={(e) => e.stopPropagation()} // ✅ ป้องกัน dropdown ปิดเมื่อคลิกภายใน
+              >
+                <Input.Search
+                  placeholder="Search forms..."
+                  allowClear
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="mb-2"
+                />
+                <div className="max-h-60 overflow-y-auto space-y-1">
+                  {savedForms
+                    .filter(f => f.title.toLowerCase().includes(searchTerm.toLowerCase()))
+                    .map(form => (
+                      <div key={form.id} className="flex items-center space-x-2">
+                        <Checkbox
+                          checked={selectedFormsForDelete.includes(form.id)}
+                          onChange={e => handleCheckboxChange(form.id, e.target.checked)}
+                        >
+                          {form.title}
+                        </Checkbox>
+                      </div>
+                    ))}
+                </div>
+                <Button
+                  danger
+                  className="mt-2 w-full"
+                  disabled={selectedFormsForDelete.length === 0}
+                  onClick={handleBulkDelete}
+                >
+                  Delete Selected
+                </Button>
+              </div>
+            )}
           >
             <Button type="primary" className="h-10 flex items-center gap-1 px-3">
               Manage Forms <DownOutlined />
