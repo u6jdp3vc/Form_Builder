@@ -1465,12 +1465,10 @@
               "paramName": "@ac",
               "value": "",
               "checked": false,
-              "countries": [
-                "AS-DTGBTN",
-                "AS-DTGTHA"
-              ],
+              "countries": [],
               "type": "text",
-              "byFixedValue": false
+              "byFixedValue": false,
+              "country": ""
             }
           ]
         }
@@ -1492,12 +1490,10 @@
               "paramName": "@ac",
               "value": "",
               "checked": false,
-              "countries": [
-                "AS-DTGBTN",
-                "AS-DTGTHA"
-              ],
+              "countries": [],
               "type": "text",
-              "byFixedValue": false
+              "byFixedValue": false,
+              "country": ""
             }
           ]
         }

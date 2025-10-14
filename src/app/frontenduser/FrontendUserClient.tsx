@@ -363,7 +363,6 @@ export default function FrontendUser({ state }: FrontendUserProps) {
             <h1 className="text-4xl font-extrabold text-center mb-10">
                 Frontend Form Viewer
             </h1>
-
             {/* Form Title & Description */}
             {selectedForm && (
                 <div className="max-w-4xl mx-auto mb-10 bg-white p-6 rounded-xl shadow-lg border border-blue-200 text-black">
